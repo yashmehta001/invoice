@@ -6,7 +6,11 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, UserLoginDto } from 'src/utils/user.dto';
+import {
+  CreateUserDto,
+  UserLoginDto,
+  UserVerificationDto,
+} from 'src/utils/user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -19,7 +23,14 @@ export class UsersController {
   }
 
   @Post('/login')
+  @UsePipes(new ValidationPipe())
   userLogin(@Body() userLoginDto: UserLoginDto) {
     return this.userService.loginUser(userLoginDto);
+  }
+
+  @Post('/verify')
+  @UsePipes(new ValidationPipe())
+  userVerify(@Body() userVerificationDto: UserVerificationDto) {
+    return this.userService.verifyUser(userVerificationDto);
   }
 }

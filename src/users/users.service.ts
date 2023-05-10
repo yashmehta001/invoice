@@ -4,7 +4,11 @@ import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/users';
-import { CreateUserParams, UserLoginParams } from 'src/utils/types';
+import {
+  CreateUserParams,
+  UserLoginParams,
+  verifyUserParams,
+} from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
 
@@ -75,5 +79,25 @@ export class UsersService {
     const payload = { id: user.id };
     const accessToken = jwt.sign(payload, jwtSecret);
     return { ...responseMessage.userLogin, accessToken };
+  }
+
+  async verifyUser(userVerificationDetails: verifyUserParams) {
+    const email = userVerificationDetails.email.toLowerCase();
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      return errorMessage.emailNotFound;
+    }
+    if (user.is_verified) {
+      return errorMessage.isVerified;
+    }
+    if (+userVerificationDetails.code != user.code) {
+      return errorMessage.isNotVerified;
+    }
+    user.is_verified = true;
+    user.code = null;
+    user.code_expiry = null;
+    const id = user.id;
+    await this.userRepository.update({ id }, { ...user });
+    return responseMessage.userVerification;
   }
 }

@@ -1,4 +1,10 @@
-import { IsNotEmpty, MinLength, IsEmail, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  MinLength,
+  IsEmail,
+  Matches,
+  Length,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -34,4 +40,13 @@ export class UserLoginDto {
       'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
   })
   password: string;
+}
+
+export class UserVerificationDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @Length(6)
+  code: string;
 }

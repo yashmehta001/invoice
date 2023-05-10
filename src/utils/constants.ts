@@ -23,10 +23,14 @@ export const createUserText = 'Welcome to Invoicing. Your OTP is ';
 export const errorMessage = {
   emailExists: { success: false, message: 'Email already Exists' },
   login: { success: false, message: 'Incorrect Email or Password' },
+  emailNotFound: { success: false, message: 'Email Not Found' },
+  isVerified: { success: false, message: 'Email already verified' },
+  isNotVerified: { success: false, message: 'Invalid OTP' },
 };
 
 //Success Responses
 export const responseMessage = {
   userCreation: { success: true, message: 'User Creation Successful' },
   userLogin: { success: true, message: 'User Login Successful' },
+  userVerification: { success: true, message: 'User Verification Successful' },
 };
