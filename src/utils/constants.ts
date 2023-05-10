@@ -12,12 +12,20 @@ export const codeExpiryTime = +process.env.CODE_EXPIRY_TIME * 60 * 1000;
 export const saltRounds = +process.env.SALTROUND;
 export const jwtSecret = process.env.JWTSECRET;
 
+//Email
+export const email = process.env.USER_EMAIL;
+export const password = process.env.EMAIL_PASSWORD;
+export const emailService = process.env.EMAIL_SERVICE;
+export const createUserSubject = 'Welcome to Invoicing';
+export const createUserText = 'Welcome to Invoicing. Your OTP is ';
+
 //Error Responses
 export const errorMessage = {
   emailExists: { success: false, message: 'Email already Exists' },
   login: { success: false, message: 'Incorrect Email or Password' },
 };
 
+//Success Responses
 export const responseMessage = {
   userCreation: { success: true, message: 'User Creation Successful' },
   userLogin: { success: true, message: 'User Login Successful' },

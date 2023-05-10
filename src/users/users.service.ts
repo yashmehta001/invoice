@@ -6,12 +6,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/users';
 import { CreateUserParams, UserLoginParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
-import { errorMessage, saltRounds, jwtSecret, responseMessage } from 'src/utils/constants';
+import { EmailService } from '../email/email.service';
+
+import {
+  errorMessage,
+  saltRounds,
+  jwtSecret,
+  responseMessage,
+  createUserSubject,
+  createUserText,
+} from 'src/utils/constants';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private emailService: EmailService,
   ) {}
 
   async createUser(createUserDetails: CreateUserParams) {
@@ -40,6 +50,12 @@ export class UsersService {
       updated_at: updatedAt,
     });
     await this.userRepository.save(newUser);
+    await this.emailService.sendEmail(
+      email,
+      createUserSubject,
+      createUserText + code,
+    );
+
     return responseMessage.userCreation;
   }
 
