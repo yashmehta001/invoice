@@ -9,6 +9,8 @@ import {
   dbPort,
   dbUsername,
 } from './utils/constants';
+import { UsersModule } from './users/users.module';
+import { User } from './entities/users';
 
 @Module({
   imports: [
@@ -19,8 +21,11 @@ import {
       username: dbUsername,
       password: dbPassword,
       database: database,
-      entities: [],
+      entities: [User],
+      synchronize: true,
+      logging: true,
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

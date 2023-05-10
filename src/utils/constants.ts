@@ -1,7 +1,24 @@
 import 'dotenv/config';
 
+//Database
 export const dbHost = process.env.DATABASE_HOST;
 export const dbPort = Number(process.env.DATABASE_PORT);
 export const dbUsername = process.env.DATABASE_USER;
 export const dbPassword = String(process.env.DATABASE_PASSWORD);
 export const database = process.env.DATABASE_NAME;
+
+//User Constants
+export const codeExpiryTime = +process.env.CODE_EXPIRY_TIME * 60 * 1000;
+export const saltRounds = +process.env.SALTROUND;
+export const jwtSecret = process.env.JWTSECRET;
+
+//Error Responses
+export const errorMessage = {
+  emailExists: { success: false, message: 'Email already Exists' },
+  login: { success: false, message: 'Incorrect Email or Password' },
+};
+
+export const responseMessage = {
+  userCreation: { success: true, message: 'User Creation Successful' },
+  userLogin: { success: true, message: 'User Login Successful' },
+};
