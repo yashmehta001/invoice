@@ -15,13 +15,11 @@ import { EmailService } from '../email/email.service';
 
 import {
   errorMessage,
-  saltRounds,
-  jwtSecret,
   responseMessage,
   createUserSubject,
   createUserText,
-  codeExpiryTime,
 } from 'src/utils/constants';
+import { constants } from 'src/config/config';
 
 @Injectable()
 export class UsersService {
@@ -38,7 +36,10 @@ export class UsersService {
       return errorMessage.emailExists;
     }
     const now = new Date();
-    const password = await bcrypt.hash(createUserDetails.password, saltRounds);
+    const password = await bcrypt.hash(
+      createUserDetails.password,
+      constants.saltRounds,
+    );
     const code = Math.floor(Math.random() * 900000) + 100000;
     const codeExpiry = now;
     const createdAt = now;
@@ -83,7 +84,7 @@ export class UsersService {
       return errorMessage.emailNotVerified;
     }
     const payload = { id: user.id };
-    const accessToken = jwt.sign(payload, jwtSecret);
+    const accessToken = jwt.sign(payload, constants.jwtSecret);
     return { ...responseMessage.userLogin, accessToken };
   }
 
@@ -106,7 +107,7 @@ export class UsersService {
       return errorMessage.isNotVerified;
     }
 
-    if (+now > +codeCreatedAt + codeExpiryTime) {
+    if (+now > +codeCreatedAt + constants.codeExpiryTime) {
       this.resendEmail({ email });
       return errorMessage.codeExpired;
     }
