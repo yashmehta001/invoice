@@ -36,5 +36,4 @@ lerna-debug.log*
 
 # Development File
 package-lock.json
-docker-compose.yml
 *.env
