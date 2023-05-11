@@ -8,6 +8,7 @@ import {
 import { UsersService } from './users.service';
 import {
   CreateUserDto,
+  ResendEmailDto,
   UserLoginDto,
   UserVerificationDto,
 } from 'src/utils/user.dto';
@@ -32,5 +33,11 @@ export class UsersController {
   @UsePipes(new ValidationPipe())
   userVerify(@Body() userVerificationDto: UserVerificationDto) {
     return this.userService.verifyUser(userVerificationDto);
+  }
+
+  @Post('/resendEmail')
+  @UsePipes(new ValidationPipe())
+  resendEmail(@Body() resendEmailDto: ResendEmailDto) {
+    return this.userService.resendEmail(resendEmailDto);
   }
 }

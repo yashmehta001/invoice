@@ -24,6 +24,11 @@ export const errorMessage = {
   emailExists: { success: false, message: 'Email already Exists' },
   login: { success: false, message: 'Incorrect Email or Password' },
   emailNotFound: { success: false, message: 'Email Not Found' },
+  emailNotVerified: {
+    success: false,
+    message: 'Email Not Verified. Resent Email',
+  },
+  codeExpired: { success: false, message: 'Code Expired. Email Resent' },
   isVerified: { success: false, message: 'Email already verified' },
   isNotVerified: { success: false, message: 'Invalid OTP' },
 };
@@ -33,4 +38,5 @@ export const responseMessage = {
   userCreation: { success: true, message: 'User Creation Successful' },
   userLogin: { success: true, message: 'User Login Successful' },
   userVerification: { success: true, message: 'User Verification Successful' },
+  resendEmail: { success: true, message: 'Email Sent Successfully' },
 };

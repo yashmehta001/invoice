@@ -7,6 +7,7 @@ import { User } from 'src/entities/users';
 import {
   CreateUserParams,
   UserLoginParams,
+  resendEmailParams,
   verifyUserParams,
 } from 'src/utils/types';
 import { Repository } from 'typeorm';
@@ -19,6 +20,7 @@ import {
   responseMessage,
   createUserSubject,
   createUserText,
+  codeExpiryTime,
 } from 'src/utils/constants';
 
 @Injectable()
@@ -38,9 +40,9 @@ export class UsersService {
     const now = new Date();
     const password = await bcrypt.hash(createUserDetails.password, saltRounds);
     const code = Math.floor(Math.random() * 900000) + 100000;
-    const codeExpiry = new Date(now.getTime() + 10 * 60000);
-    const createdAt = new Date();
-    const updatedAt = new Date();
+    const codeExpiry = now;
+    const createdAt = now;
+    const updatedAt = now;
 
     const newUser = this.userRepository.create({
       first_name: createUserDetails.firstName,
@@ -49,7 +51,7 @@ export class UsersService {
       password: password,
       is_verified: false,
       code: code,
-      code_expiry: codeExpiry,
+      code_created_at: codeExpiry,
       created_at: createdAt,
       updated_at: updatedAt,
     });
@@ -76,6 +78,10 @@ export class UsersService {
     if (!verifyPassword) {
       return errorMessage.login;
     }
+    if (!user.is_verified) {
+      this.resendEmail({ email });
+      return errorMessage.emailNotVerified;
+    }
     const payload = { id: user.id };
     const accessToken = jwt.sign(payload, jwtSecret);
     return { ...responseMessage.userLogin, accessToken };
@@ -83,21 +89,61 @@ export class UsersService {
 
   async verifyUser(userVerificationDetails: verifyUserParams) {
     const email = userVerificationDetails.email.toLowerCase();
+    const now = new Date().getTime();
     const user = await this.userRepository.findOne({ where: { email } });
+    const codeCreatedAt = new Date(user.code_created_at);
+    const id = user.id;
+
     if (!user) {
       return errorMessage.emailNotFound;
     }
+
     if (user.is_verified) {
       return errorMessage.isVerified;
     }
+
     if (+userVerificationDetails.code != user.code) {
       return errorMessage.isNotVerified;
     }
+
+    if (+now > +codeCreatedAt + codeExpiryTime) {
+      this.resendEmail({ email });
+      return errorMessage.codeExpired;
+    }
+
     user.is_verified = true;
     user.code = null;
-    user.code_expiry = null;
-    const id = user.id;
+    user.code_created_at = null;
+
     await this.userRepository.update({ id }, { ...user });
     return responseMessage.userVerification;
+  }
+
+  async resendEmail(resendEmailDetails: resendEmailParams) {
+    const email = resendEmailDetails.email.toLowerCase();
+    const code = Math.floor(Math.random() * 900000) + 100000;
+    const user = await this.userRepository.findOne({ where: { email } });
+    const id = user.id;
+
+    if (!user) {
+      return errorMessage.emailNotFound;
+    }
+
+    if (user.is_verified) {
+      return errorMessage.isVerified;
+    }
+
+    await this.emailService.sendEmail(
+      email,
+      createUserSubject,
+      createUserText + code,
+    );
+
+    user.code = null;
+    user.code_created_at = new Date();
+    user.code = code;
+
+    await this.userRepository.update({ id }, { ...user });
+    return responseMessage.resendEmail;
   }
 }

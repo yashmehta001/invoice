@@ -14,3 +14,7 @@ export type verifyUserParams = {
   email: string;
   code: string;
 };
+
+export type resendEmailParams = {
+  email: string;
+};

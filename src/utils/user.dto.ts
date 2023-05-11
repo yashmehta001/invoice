@@ -8,10 +8,10 @@ import {
 
 export class CreateUserDto {
   @IsNotEmpty()
-  @MinLength(2)
+  @MinLength(3)
   firstName: string;
   @IsNotEmpty()
-  @MinLength(2)
+  @MinLength(3)
   lastName: string;
   @IsNotEmpty()
   @IsEmail()
@@ -49,4 +49,10 @@ export class UserVerificationDto {
 
   @Length(6)
   code: string;
+}
+
+export class ResendEmailDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
 }

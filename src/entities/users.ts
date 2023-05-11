@@ -32,7 +32,7 @@ export class User {
   @Column({
     nullable: true,
   })
-  code_expiry: Date;
+  code_created_at: Date;
 
   @Column({
     default: new Date(),
