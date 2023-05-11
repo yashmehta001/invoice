@@ -1,23 +1,5 @@
 import 'dotenv/config';
 
-//
-export const port = process.env.PORT;
-//Database
-export const dbHost = process.env.DATABASE_HOST;
-export const dbPort = Number(process.env.DATABASE_PORT);
-export const dbUsername = process.env.DATABASE_USER;
-export const dbPassword = String(process.env.DATABASE_PASSWORD);
-export const database = process.env.DATABASE_NAME;
-
-//User Constants
-export const codeExpiryTime = +process.env.CODE_EXPIRY_TIME * 60 * 1000;
-export const saltRounds = +process.env.SALTROUND;
-export const jwtSecret = process.env.JWTSECRET;
-
-//Email
-export const email = process.env.USER_EMAIL;
-export const password = process.env.EMAIL_PASSWORD;
-export const emailService = process.env.EMAIL_SERVICE;
 export const createUserSubject = 'Welcome to Invoicing';
 export const createUserText = 'Welcome to Invoicing. Your OTP is ';
 

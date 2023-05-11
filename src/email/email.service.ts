@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { email, emailService, password } from 'src/utils/constants';
+import { email } from '../config/config';
 
 @Injectable({})
 export class EmailService {
   async sendEmail(to: string, subject: string, text: string): Promise<void> {
     const transporter = nodemailer.createTransport({
-      service: emailService,
+      service: email.emailService,
       auth: {
-        user: email,
-        pass: password,
+        user: email.email,
+        pass: email.password,
       },
     });
     await transporter.sendMail(
       {
-        from: email,
+        from: email.email,
         to,
         subject,
         text,
