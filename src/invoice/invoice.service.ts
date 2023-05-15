@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EmailService } from 'src/email/email.service';
 import { Invoice } from 'src/entities/invoice';
@@ -12,6 +12,9 @@ import {
 import { Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
 import { PaymentStatus } from 'src/utils/user.dto';
+import { extname } from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'fs';
 
 @Injectable()
 export class InvoiceService {
@@ -95,5 +98,25 @@ export class InvoiceService {
     };
     await this.invoiceRepository.save(invoice);
     return invoice;
+  }
+
+  async checkFile(file: Express.Multer.File): Promise<void> {
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+
+    if (file.size > 2000000) {
+      throw new BadRequestException('File size should not exceed 2MB');
+    }
+    const fileType = file.originalname.split('.').pop();
+    if (fileType !== 'jpg' && fileType !== 'png') {
+      throw new BadRequestException('File type should be JPG or PNG');
+    }
+  }
+
+  async saveFile(file: Express.Multer.File): Promise<string> {
+    const filename = `${uuidv4()}${extname(file.originalname)}`;
+    fs.writeFileSync(`files/logos/${filename}`, file.buffer);
+    return filename;
   }
 }

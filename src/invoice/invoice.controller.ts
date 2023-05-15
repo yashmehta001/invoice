@@ -1,10 +1,13 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
   Param,
   Post,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
@@ -14,6 +17,8 @@ import {
   createUserDto,
   getInvoicesDto,
 } from 'src/utils/user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { mapper } from 'src/utils/mapper';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -41,5 +46,17 @@ export class InvoiceController {
     @Body() invoiceDetailsDto: createUserDto,
   ) {
     return this.invoiceService.createInvoice(invoiceDetailsDto, user);
+  }
+
+  @Post('logo')
+  @UseInterceptors(FileInterceptor('logo'))
+  async handleUpload(@UploadedFile() file: Express.Multer.File) {
+    try {
+      await this.invoiceService.checkFile(file);
+      const filename = await this.invoiceService.saveFile(file);
+      return { success: true, filename };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
