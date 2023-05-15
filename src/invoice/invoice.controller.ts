@@ -18,7 +18,6 @@ import {
   getInvoicesDto,
 } from 'src/utils/user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { mapper } from 'src/utils/mapper';
 
 @Controller('invoice')
 export class InvoiceController {
