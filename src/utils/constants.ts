@@ -15,6 +15,7 @@ export const errorMessage = {
   codeExpired: { success: false, message: 'Code Expired. Email Resent' },
   isVerified: { success: false, message: 'Email already verified' },
   isNotVerified: { success: false, message: 'Invalid OTP' },
+  invalidJwt: { success: false, message: 'JWT failed. Re-login' },
 };
 
 //Success Responses
@@ -23,4 +24,5 @@ export const responseMessage = {
   userLogin: { success: true, message: 'User Login Successful' },
   userVerification: { success: true, message: 'User Verification Successful' },
   resendEmail: { success: true, message: 'Email Sent Successfully' },
+  noInvoice: { success: true, message: 'No invoices stored yet!' },
 };

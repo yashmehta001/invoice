@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import { User } from './entities/users';
 import { EmailModule } from './email/email.module';
 import { database } from './config/config';
+import { Invoice } from './entities/invoice';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -14,12 +16,13 @@ import { database } from './config/config';
       username: database.dbUsername,
       password: database.dbPassword,
       database: database.databaseName,
-      entities: [User],
+      entities: [User, Invoice],
       synchronize: true,
       logging: true,
     }),
     UsersModule,
     EmailModule,
+    InvoiceModule,
   ],
   controllers: [],
   providers: [],
