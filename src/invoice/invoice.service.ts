@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EmailService } from 'src/email/email.service';
 import { Invoice } from 'src/entities/invoice';
 import { User } from 'src/entities/users';
 import { responseMessage } from 'src/utils/constants';
