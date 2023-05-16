@@ -49,10 +49,13 @@ export class InvoiceController {
 
   @Post('logo')
   @UseInterceptors(FileInterceptor('logo'))
-  async handleUpload(@UploadedFile() file: Express.Multer.File) {
+  async handleUpload(
+    @Headers('user') user: getInvoicesDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     try {
       await this.invoiceService.checkFile(file);
-      const filename = await this.invoiceService.saveFile(file);
+      const filename = await this.invoiceService.saveFile(user, file);
       return { success: true, filename };
     } catch (error) {
       throw new BadRequestException(error.message);

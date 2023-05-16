@@ -6,11 +6,12 @@ import { EmailService } from 'src/email/email.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/users';
 import { Invoice } from 'src/entities/invoice';
+import { PdfService } from 'src/pdf/pdf.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Invoice])],
   controllers: [InvoiceController],
-  providers: [InvoiceService, EmailService, InvoiceService],
+  providers: [InvoiceService, EmailService, InvoiceService, PdfService],
 })
 export class InvoiceModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -113,6 +113,8 @@ export class createUserDto {
 
   sellerGst: string;
 
+  logo: string;
+
   @IsNotEmpty()
   clientName: string;
 

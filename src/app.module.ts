@@ -6,6 +6,7 @@ import { EmailModule } from './email/email.module';
 import { database } from './config/config';
 import { Invoice } from './entities/invoice';
 import { InvoiceModule } from './invoice/invoice.module';
+import { PdfModule } from './pdf/pdf.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { InvoiceModule } from './invoice/invoice.module';
     UsersModule,
     EmailModule,
     InvoiceModule,
+    PdfModule,
   ],
   controllers: [],
   providers: [],

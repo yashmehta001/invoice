@@ -15,6 +15,7 @@ import { PaymentStatus } from 'src/utils/user.dto';
 import { extname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
+import { PdfService } from 'src/pdf/pdf.service';
 
 @Injectable()
 export class InvoiceService {
@@ -22,6 +23,7 @@ export class InvoiceService {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
     private emailService: EmailService,
+    private pdfService: PdfService,
   ) {}
 
   async getInvoice(
@@ -64,14 +66,22 @@ export class InvoiceService {
     createInvoiceDetails: createInvoiceParams,
     user: getInvoiceParams,
   ) {
-    createInvoiceDetails.invoiceName = `${user}/${createInvoiceDetails.invoiceName}`;
+    const invoiceName = `${user}_${createInvoiceDetails.invoiceName}`;
+    const isInvoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (isInvoice) {
+      console.log(isInvoice);
+      throw new BadRequestException('Invoice Name should be Unique');
+    }
     const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
     const orderItems = createInvoiceDetails.orderItem;
     const subTotalAmount = mapper.calculateTotalAmount(orderItems);
     const total = subTotalAmount + (subTotalAmount * tax) / 100;
+    const logo = createInvoiceDetails.logo;
     const invoice = {
       seller_name: createInvoiceDetails.sellerName,
-      invoice_name: createInvoiceDetails.invoiceName,
+      invoice_name: invoiceName,
       seller_id: user.toString(),
       seller_email: createInvoiceDetails.sellerEmail,
       billing_date: new Date(createInvoiceDetails.billingDate),
@@ -80,7 +90,7 @@ export class InvoiceService {
       seller_address_3: createInvoiceDetails.sellerAddress3,
       seller_mobile: createInvoiceDetails.sellerMobile,
       seller_gst: createInvoiceDetails.sellerGst,
-      logo: 'null',
+      logo: logo,
       client_name: createInvoiceDetails.clientName,
       client_email: createInvoiceDetails.clientEmail,
       client_address_1: createInvoiceDetails.clientAddress1,
@@ -93,11 +103,16 @@ export class InvoiceService {
       status: createInvoiceDetails.status,
       sub_total: subTotalAmount,
       total: total,
-      creater_at: new Date(),
+      created_at: new Date(),
       updated_at: new Date(),
     };
-    await this.invoiceRepository.save(invoice);
-    return invoice;
+    try {
+      await this.invoiceRepository.save(invoice);
+      await this.pdfService.generatePdf(invoice);
+      return invoice;
+    } catch (e) {
+      return e;
+    }
   }
 
   async checkFile(file: Express.Multer.File): Promise<void> {
@@ -114,8 +129,11 @@ export class InvoiceService {
     }
   }
 
-  async saveFile(file: Express.Multer.File): Promise<string> {
-    const filename = `${uuidv4()}${extname(file.originalname)}`;
+  async saveFile(
+    user: getInvoiceParams,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const filename = `${user}_${uuidv4()}${extname(file.originalname)}`;
     fs.writeFileSync(`files/logos/${filename}`, file.buffer);
     return filename;
   }
