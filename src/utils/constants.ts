@@ -3,6 +3,9 @@ import 'dotenv/config';
 export const createUserSubject = 'Welcome to Invoicing';
 export const createUserText = 'Welcome to Invoicing. Your OTP is ';
 
+export const emailInvoiceSubject = 'Invoice';
+export const emailInvoiceText = 'PFA Invoice';
+
 //Error Responses
 export const errorMessage = {
   emailExists: { success: false, message: 'Email already Exists' },

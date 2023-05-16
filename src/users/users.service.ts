@@ -61,6 +61,7 @@ export class UsersService {
       email,
       createUserSubject,
       createUserText + code,
+      null,
     );
 
     return responseMessage.userCreation;
@@ -138,6 +139,7 @@ export class UsersService {
       email,
       createUserSubject,
       createUserText + code,
+      null,
     );
 
     user.code = null;

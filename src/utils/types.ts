@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { OrderItem, PaymentStatus, currency } from './user.dto';
 
 export type CreateUserParams = {
@@ -98,4 +99,9 @@ export type createPdfParams = {
   total: number;
   created_at: Date;
   updated_at: Date;
+};
+
+export type attachmentParams = {
+  filename: string;
+  content: fs.ReadStream;
 };

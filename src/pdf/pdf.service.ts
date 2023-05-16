@@ -2,14 +2,17 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as PDFDocument from 'pdfkit';
+import { EmailService } from 'src/email/email.service';
+import { emailInvoiceSubject, emailInvoiceText } from 'src/utils/constants';
 import { createPdfParams } from 'src/utils/types';
 
 @Injectable()
 export class PdfService {
+  constructor(private emailService: EmailService) {}
+
   async generatePdf(invoiceDetails: createPdfParams) {
     const seller_name = invoiceDetails.seller_name;
     const invoice_name = invoiceDetails.invoice_name;
-    const seller_id = invoiceDetails.seller_id;
     const seller_email = invoiceDetails.seller_email;
     const billing_date = invoiceDetails.billing_date;
     const seller_address_1 = invoiceDetails.seller_address_1;
@@ -39,7 +42,7 @@ export class PdfService {
     doc
       .fontSize(12)
       .text(
-        ` seller name: ${seller_name} invoice name: ${invoice_name} seller id: ${seller_id} seller email: ${seller_email} billing date: ${billing_date} seller address_1: ${seller_address_1} seller address_2: ${seller_address_2} seller address_3: ${seller_address_3} seller mobile: ${seller_mobile} seller gst: ${seller_gst} logo: ${logo} client name: ${client_name} client email: ${client_email} client address_1: ${client_address_1} client address_2: ${client_address_2} client address_3: ${client_address_3} client mobile: ${client_mobile} tax: ${tax} currency: ${currency} status: ${status} sub total: ${sub_total} total: ${total} `,
+        `seller name: ${seller_name}, invoice name: ${invoice_name}, seller email: ${seller_email}, billing date: ${billing_date}, seller address_1: ${seller_address_1}, seller address_2: ${seller_address_2}, seller address_3: ${seller_address_3}, seller mobile: ${seller_mobile}, seller gst: ${seller_gst}, logo: ${logo}, client name: ${client_name}, client email: ${client_email}, client address_1: ${client_address_1}, client address_2: ${client_address_2}, client address_3: ${client_address_3}, client mobile: ${client_mobile}, tax: ${tax}, currency: ${currency}, status: ${status}, sub total: ${sub_total}, total: ${total}`,
         100,
         100,
       );
@@ -62,6 +65,18 @@ export class PdfService {
 
     doc.pipe(fs.createWriteStream(filePath));
     doc.end();
+    const attachments = [
+      {
+        filename: fileName,
+        content: fs.createReadStream(filePath),
+      },
+    ];
+    await this.emailService.sendEmail(
+      client_email,
+      emailInvoiceSubject,
+      emailInvoiceText,
+      attachments,
+    );
     return;
   }
 }

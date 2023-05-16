@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { email } from '../config/config';
+import { attachmentParams } from 'src/utils/types';
 
 @Injectable({})
 export class EmailService {
-  async sendEmail(to: string, subject: string, text: string): Promise<void> {
+  async sendEmail(
+    to: string,
+    subject: string,
+    text: string,
+    attachments: attachmentParams[] | null,
+  ): Promise<void> {
     const transporter = nodemailer.createTransport({
       service: email.emailService,
       auth: {
@@ -18,6 +24,7 @@ export class EmailService {
         to,
         subject,
         text,
+        attachments: attachments,
       },
       function (err: any, info: { response: string }) {
         if (err) {
