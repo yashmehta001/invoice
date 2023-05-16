@@ -22,7 +22,6 @@ export class InvoiceService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
-    private emailService: EmailService,
     private pdfService: PdfService,
   ) {}
 
@@ -52,7 +51,7 @@ export class InvoiceService {
     }
     let total = 0;
     invoices.forEach((invoice) => {
-      const parts = invoice.invoice_name.split('/');
+      const parts = invoice.invoice_name.split('_');
       invoice.invoice_name = parts[1];
       if (invoice.status == PaymentStatus.Outstanding) {
         total += invoice.total;

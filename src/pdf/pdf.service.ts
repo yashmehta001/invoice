@@ -5,6 +5,7 @@ import * as PDFDocument from 'pdfkit';
 import { EmailService } from 'src/email/email.service';
 import { emailInvoiceSubject, emailInvoiceText } from 'src/utils/constants';
 import { createPdfParams } from 'src/utils/types';
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class PdfService {
@@ -12,7 +13,7 @@ export class PdfService {
 
   async generatePdf(invoiceDetails: createPdfParams) {
     const seller_name = invoiceDetails.seller_name;
-    const invoice_name = invoiceDetails.invoice_name;
+    const invoice_name = invoiceDetails.invoice_name.split('_')[1];
     const seller_email = invoiceDetails.seller_email;
     const billing_date = invoiceDetails.billing_date;
     const seller_address_1 = invoiceDetails.seller_address_1;
@@ -33,7 +34,7 @@ export class PdfService {
     const status = invoiceDetails.status;
     const sub_total = invoiceDetails.sub_total;
     const total = invoiceDetails.total;
-
+    console.log(invoice_name);
     const fileName = invoiceDetails.invoice_name;
     const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
     const filePath = path.join(pdfFolder, '/', fileName);
@@ -67,7 +68,7 @@ export class PdfService {
     doc.end();
     const attachments = [
       {
-        filename: fileName,
+        filename: uuid(),
         content: fs.createReadStream(filePath),
       },
     ];
