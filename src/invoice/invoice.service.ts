@@ -11,7 +11,7 @@ import {
 import { Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
 import { PaymentStatus } from 'src/utils/user.dto';
-import { extname } from 'path';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import { PdfService } from 'src/pdf/pdf.service';
@@ -19,7 +19,6 @@ import { PdfService } from 'src/pdf/pdf.service';
 @Injectable()
 export class InvoiceService {
   constructor(
-    @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
     private pdfService: PdfService,
   ) {}
@@ -131,7 +130,11 @@ export class InvoiceService {
     user: getInvoiceParams,
     file: Express.Multer.File,
   ): Promise<string> {
-    const filename = `${user}_${uuidv4()}${extname(file.originalname)}`;
+    const filename = `${user}_${uuidv4()}${path.extname(file.originalname)}`;
+    const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
+    if (!fs.existsSync(logoFolder)) {
+      fs.mkdirSync(logoFolder, { recursive: true });
+    }
     fs.writeFileSync(`files/logos/${filename}`, file.buffer);
     return filename;
   }

@@ -35,9 +35,11 @@ export class PdfService {
     const sub_total = invoiceDetails.sub_total;
     const total = invoiceDetails.total;
     console.log(invoice_name);
-    const fileName = invoiceDetails.invoice_name;
+
+    const filename = path.join(__dirname, '..', '..', 'files');
+    const pdfName = invoiceDetails.invoice_name;
     const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
-    const filePath = path.join(pdfFolder, '/', fileName);
+    const pdfPath = path.join(pdfFolder, '/', pdfName);
     const doc = new PDFDocument();
 
     doc
@@ -64,12 +66,18 @@ export class PdfService {
       doc.image(`${logoPath}`, 320, 280, { scale: 0.25 });
     }
 
-    doc.pipe(fs.createWriteStream(filePath));
+    if (!fs.existsSync(filename)) {
+      fs.mkdirSync(pdfFolder, { recursive: true });
+    }
+    if (!fs.existsSync(pdfFolder)) {
+      fs.mkdirSync(pdfFolder, { recursive: true });
+    }
+    doc.pipe(fs.createWriteStream(pdfPath));
     doc.end();
     const attachments = [
       {
         filename: uuid(),
-        content: fs.createReadStream(filePath),
+        content: fs.createReadStream(pdfPath),
       },
     ];
     await this.emailService.sendEmail(
