@@ -50,15 +50,6 @@ export class InvoiceController {
     return this.invoiceService.getInvoice(user);
   }
 
-  @Get(':name')
-  @UsePipes(new ValidationPipe())
-  async getInvoice(
-    @Headers('user') user: getInvoicesDto,
-    @Param('name') name: string,
-  ) {
-    return await this.invoiceService.getInvoiceDetails(user, name);
-  }
-
   @Post('paid')
   @UsePipes(new ValidationPipe())
   async invoicePaind(
@@ -117,13 +108,22 @@ export class InvoiceController {
     return responseMessage.emailInvoice;
   }
 
-  @Get(':status')
+  @Get('status/:status')
   @UsePipes(new ValidationPipe())
   userInvoiceStatus(
     @Headers('user') user: getInvoicesDto,
     @Param('status') status: PaymentStatus,
   ) {
     return this.invoiceService.getInvoice(user, status);
+  }
+
+  @Get(':name')
+  @UsePipes(new ValidationPipe())
+  async getInvoice(
+    @Headers('user') user: getInvoicesDto,
+    @Param('name') name: string,
+  ) {
+    return await this.invoiceService.getInvoiceDetails(user, name);
   }
 
   @Post(':action')
