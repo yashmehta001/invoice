@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   Param,
@@ -128,5 +129,14 @@ export class InvoiceController {
       return responseMessage.emailInvoice;
     }
     return responseMessage.invoiceSaved;
+  }
+
+  @Delete(':name')
+  async deleteInvoice(
+    @Headers('user') user: getInvoicesDto,
+    @Param('name') name: string,
+  ) {
+    await this.invoiceService.deleteInvoice(user, name);
+    return 'Delete';
   }
 }

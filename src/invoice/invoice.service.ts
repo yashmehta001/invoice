@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from 'src/entities/invoice';
-import { responseMessage } from 'src/utils/constants';
+import { logoFolder, pdfFolder, responseMessage } from 'src/utils/constants';
 import {
   createInvoiceParams,
   getInvoiceParams,
@@ -68,7 +68,6 @@ export class InvoiceService {
       where: { invoice_name: invoiceName },
     });
     if (isInvoice) {
-      console.log(isInvoice);
       throw new BadRequestException('Invoice Name should be Unique');
     }
     const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
@@ -219,5 +218,35 @@ export class InvoiceService {
 
     const savedInvoice = await this.invoiceRepository.save(invoice);
     return savedInvoice;
+  }
+
+  async deleteInvoice(user: getInvoiceParams, deleteInvoiceName: string) {
+    const invoiceName = `${user}_${deleteInvoiceName}`;
+    const invoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (!invoice) {
+      throw new BadRequestException('Invoice Not Found');
+    }
+    const logo = `${logoFolder}/${invoice.logo}`;
+    const pdf = `${pdfFolder}/${invoice.invoice_name}`;
+    if (fs.existsSync(logo)) {
+      fs.unlink(logo, (err) => {
+        if (err) {
+          console.log(err);
+        }
+        return;
+      });
+    }
+    if (fs.existsSync(pdf)) {
+      fs.unlink(pdf, (err) => {
+        if (err) {
+          console.log(err);
+        }
+        return;
+      });
+    }
+    await this.invoiceRepository.remove(invoice);
+    return;
   }
 }
