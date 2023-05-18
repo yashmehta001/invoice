@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from 'src/entities/invoice';
-import { User } from 'src/entities/users';
 import { responseMessage } from 'src/utils/constants';
 import {
   createInvoiceParams,
   getInvoiceParams,
   typeGetDbSeach,
+  updateInvoiceParams,
 } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
@@ -104,9 +104,7 @@ export class InvoiceService {
       updated_at: new Date(),
     };
     try {
-      await this.invoiceRepository.save(invoice);
-      await this.pdfService.generatePdf(invoice);
-      return invoice;
+      return await this.invoiceRepository.save(invoice);
     } catch (e) {
       return e;
     }
@@ -137,5 +135,89 @@ export class InvoiceService {
     }
     fs.writeFileSync(`files/logos/${filename}`, file.buffer);
     return filename;
+  }
+
+  async updateInvoice(
+    updateInvoiceName: string,
+    updateInvoiceDetails: updateInvoiceParams,
+    user: getInvoiceParams,
+  ) {
+    const invoiceName = `${user}_${updateInvoiceName}`;
+    const invoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (!invoice) {
+      throw new BadRequestException('Invoice Not Found');
+    }
+    if (updateInvoiceDetails.orderItem.length) {
+      invoice.sub_total = mapper.calculateTotalAmount(
+        updateInvoiceDetails.orderItem,
+      );
+      invoice.total =
+        invoice.sub_total +
+        (invoice.sub_total * updateInvoiceDetails.tax) / 100;
+    }
+    invoice.seller_name = updateInvoiceDetails.sellerName
+      ? updateInvoiceDetails.sellerName
+      : invoice.seller_name;
+    invoice.invoice_name = invoiceName;
+    invoice.seller_email = updateInvoiceDetails.sellerEmail
+      ? updateInvoiceDetails.sellerEmail
+      : invoice.seller_email;
+    invoice.billing_date = updateInvoiceDetails.billingDate
+      ? new Date(updateInvoiceDetails.billingDate)
+      : invoice.billing_date;
+    invoice.seller_address_1 = updateInvoiceDetails.sellerAddress1
+      ? updateInvoiceDetails.sellerAddress1
+      : invoice.seller_address_1;
+    invoice.seller_address_2 = updateInvoiceDetails.sellerAddress2
+      ? updateInvoiceDetails.sellerAddress2
+      : invoice.seller_address_2;
+    invoice.seller_address_3 = updateInvoiceDetails.sellerAddress3
+      ? updateInvoiceDetails.sellerAddress3
+      : invoice.seller_address_3;
+    invoice.seller_mobile = updateInvoiceDetails.sellerMobile
+      ? updateInvoiceDetails.sellerMobile
+      : invoice.seller_mobile;
+    invoice.seller_gst = updateInvoiceDetails.sellerGst
+      ? updateInvoiceDetails.sellerGst
+      : invoice.seller_gst;
+    invoice.logo = updateInvoiceDetails.logo
+      ? updateInvoiceDetails.logo
+      : invoice.logo;
+    invoice.client_name = updateInvoiceDetails.clientName
+      ? updateInvoiceDetails.clientName
+      : invoice.client_name;
+    invoice.client_email = updateInvoiceDetails.clientEmail
+      ? updateInvoiceDetails.clientEmail
+      : invoice.client_email;
+    invoice.client_address_1 = updateInvoiceDetails.clientAddress1
+      ? updateInvoiceDetails.clientAddress1
+      : invoice.client_address_1;
+    invoice.client_address_2 = updateInvoiceDetails.clientAddress2
+      ? updateInvoiceDetails.clientAddress2
+      : invoice.client_address_2;
+    invoice.client_address_3 = updateInvoiceDetails.clientAddress3
+      ? updateInvoiceDetails.clientAddress3
+      : invoice.client_address_3;
+    invoice.client_mobile = updateInvoiceDetails.clientMobile
+      ? updateInvoiceDetails.clientMobile
+      : invoice.client_mobile;
+    invoice.order_items = updateInvoiceDetails.orderItem
+      ? updateInvoiceDetails.orderItem
+      : invoice.order_items;
+    invoice.tax = updateInvoiceDetails.tax
+      ? updateInvoiceDetails.tax
+      : invoice.tax;
+    invoice.currency = updateInvoiceDetails.currency
+      ? updateInvoiceDetails.currency
+      : invoice.currency;
+    invoice.status = updateInvoiceDetails.status
+      ? updateInvoiceDetails.status
+      : invoice.status;
+    invoice.updated_at = new Date();
+
+    const savedInvoice = await this.invoiceRepository.save(invoice);
+    return savedInvoice;
   }
 }

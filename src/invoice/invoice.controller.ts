@@ -6,6 +6,7 @@ import {
   Headers,
   Param,
   Post,
+  Put,
   UploadedFile,
   UseInterceptors,
   UsePipes,
@@ -14,14 +15,29 @@ import {
 import { InvoiceService } from './invoice.service';
 import {
   PaymentStatus,
-  createUserDto,
+  CreateInvoiceDto,
   getInvoicesDto,
+  UpdateInvoiceDetailsDto,
+  Action,
 } from 'src/utils/user.dto';
+import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PdfService } from 'src/pdf/pdf.service';
+import {
+  emailInvoiceSubject,
+  emailInvoiceText,
+  responseMessage,
+} from 'src/utils/constants';
+import { v4 as uuid } from 'uuid';
+import { EmailService } from 'src/email/email.service';
 
 @Controller('invoice')
 export class InvoiceController {
-  constructor(private invoiceService: InvoiceService) {}
+  constructor(
+    private invoiceService: InvoiceService,
+    private pdfService: PdfService,
+    private emailService: EmailService,
+  ) {}
 
   @Get()
   @UsePipes(new ValidationPipe())
@@ -38,13 +54,34 @@ export class InvoiceController {
     return this.invoiceService.getInvoice(user, status);
   }
 
-  @Post()
+  @Post(':action')
   @UsePipes(new ValidationPipe())
-  createInvoice(
+  async createInvoice(
     @Headers('user') user: getInvoicesDto,
-    @Body() invoiceDetailsDto: createUserDto,
+    @Body() invoiceDetailsDto: CreateInvoiceDto,
+    @Param('action') action: Action,
   ) {
-    return this.invoiceService.createInvoice(invoiceDetailsDto, user);
+    const invoice = await this.invoiceService.createInvoice(
+      invoiceDetailsDto,
+      user,
+    );
+    const pdfPath = await this.pdfService.generatePdf(invoice);
+
+    if (action == 'email') {
+      const attachments = [
+        {
+          filename: uuid(),
+          content: fs.createReadStream(pdfPath),
+        },
+      ];
+      await this.emailService.sendEmail(
+        invoiceDetailsDto.clientEmail,
+        emailInvoiceSubject,
+        emailInvoiceText,
+        attachments,
+      );
+    }
+    return responseMessage.emailInvoice;
   }
 
   @Post('logo')
@@ -60,5 +97,36 @@ export class InvoiceController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  @Put(':name/:action')
+  async updatePdf(
+    @Headers('user') user: getInvoicesDto,
+    @Param('name') name: string,
+    @Param('action') action: Action,
+    @Body() updateInvoiceDetailsDto: UpdateInvoiceDetailsDto,
+  ) {
+    const invoice = await this.invoiceService.updateInvoice(
+      name,
+      updateInvoiceDetailsDto,
+      user,
+    );
+    const pdfPath = await this.pdfService.generatePdf(invoice);
+    if (action == 'email') {
+      const attachments = [
+        {
+          filename: uuid(),
+          content: fs.createReadStream(pdfPath),
+        },
+      ];
+      await this.emailService.sendEmail(
+        updateInvoiceDetailsDto.clientEmail,
+        emailInvoiceSubject,
+        emailInvoiceText,
+        attachments,
+      );
+      return responseMessage.emailInvoice;
+    }
+    return responseMessage.invoiceSaved;
   }
 }

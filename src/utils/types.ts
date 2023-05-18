@@ -68,6 +68,48 @@ export type createInvoiceParams = {
   orderItem: OrderItem[];
 };
 
+export type updateInvoiceParams = {
+  sellerName?: string;
+
+  invoiceName?: string;
+
+  sellerEmail?: string;
+
+  sellerAddress1?: string;
+
+  sellerAddress2?: string;
+
+  sellerAddress3?: string;
+
+  sellerMobile?: string;
+
+  sellerGst?: string;
+
+  logo?: string;
+
+  clientName?: string;
+
+  clientEmail?: string;
+
+  clientAddress1?: string;
+
+  clientAddress2?: string;
+
+  clientAddress3?: string;
+
+  clientMobile?: string;
+
+  tax?: number;
+
+  currency?: currency;
+
+  status?: PaymentStatus;
+
+  billingDate?: number;
+
+  orderItem?: OrderItem[];
+};
+
 export type typeGetDbSeach = {
   seller_id: string;
   status?: PaymentStatus;

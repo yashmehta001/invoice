@@ -87,13 +87,18 @@ export enum PaymentStatus {
   Paid = 'Paid',
 }
 
+export enum Action {
+  Save = 'save',
+  Email = 'email',
+}
+
 export enum currency {
   IND = 'INR',
   USD = 'USD',
   EUR = 'EUR',
   GBP = 'GBP',
 }
-export class createUserDto {
+export class CreateInvoiceDto {
   @IsNotEmpty()
   sellerName: string;
 
@@ -145,4 +150,58 @@ export class createUserDto {
   @ValidateNested({ each: true })
   @Type(() => OrderItem)
   orderItem: OrderItem[];
+}
+
+export class UpdateInvoiceDetailsDto {
+  @IsNotEmpty()
+  sellerName?: string;
+
+  invoiceName?: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  sellerEmail?: string;
+
+  sellerAddress1?: string;
+
+  sellerAddress2?: string;
+
+  sellerAddress3?: string;
+
+  sellerMobile?: string;
+
+  sellerGst?: string;
+
+  logo?: string;
+
+  @IsNotEmpty()
+  clientName?: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  clientEmail?: string;
+
+  clientAddress1?: string;
+
+  clientAddress2?: string;
+
+  clientAddress3?: string;
+
+  clientMobile?: string;
+
+  tax?: number;
+
+  @IsEnum(currency)
+  currency?: currency;
+
+  @IsEnum(PaymentStatus)
+  status?: PaymentStatus;
+
+  billingDate?: number;
+
+  @IsNotEmpty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItem)
+  orderItem?: OrderItem[];
 }

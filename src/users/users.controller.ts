@@ -19,8 +19,8 @@ export class UsersController {
 
   @Post('/signup')
   @UsePipes(new ValidationPipe())
-  userSignup(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+  userSignup(@Body() CreateInvoiceDto: CreateUserDto) {
+    return this.userService.createUser(CreateInvoiceDto);
   }
 
   @Post('/login')

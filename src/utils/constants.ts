@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import * as path from 'path';
 
 export const createUserSubject = 'Welcome to Invoicing';
 export const createUserText = 'Welcome to Invoicing. Your OTP is ';
@@ -28,4 +29,11 @@ export const responseMessage = {
   userVerification: { success: true, message: 'User Verification Successful' },
   resendEmail: { success: true, message: 'Email Sent Successfully' },
   noInvoice: { success: true, message: 'No invoices stored yet!' },
+  emailInvoice: { success: true, message: 'Invoice Emailed to Client!' },
+  invoiceSaved: { success: true, message: 'Invoice saved as PDF' },
 };
+
+//PDF
+export const filename = path.join(__dirname, '..', '..', 'files');
+export const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
+export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');

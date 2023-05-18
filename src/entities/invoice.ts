@@ -102,10 +102,10 @@ export class Invoice {
   @Column('json')
   order_items: Array<{ name: string; quantity: number; price: number }>;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   sub_total: number;
 
-  @Column()
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
   total: number;
 
   @Column({
