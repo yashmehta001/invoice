@@ -20,6 +20,7 @@ export const errorMessage = {
   isVerified: { success: false, message: 'Email already verified' },
   isNotVerified: { success: false, message: 'Invalid OTP' },
   invalidJwt: { success: false, message: 'JWT failed. Re-login' },
+  emailPDF: { success: false, message: 'PDF not Found' },
 };
 
 //Success Responses

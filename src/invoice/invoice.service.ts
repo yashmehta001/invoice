@@ -59,6 +59,30 @@ export class InvoiceService {
     //to-do add remaining code
   }
 
+  async getInvoiceDetails(user: getInvoiceParams, name: string) {
+    const invoiceName = `${user}_${name}`;
+    const isInvoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (!isInvoice) {
+      throw new BadRequestException('Invoice Not Found');
+    }
+    delete isInvoice.created_at;
+    delete isInvoice.updated_at;
+    return isInvoice;
+  }
+
+  async checkInvoice(user: getInvoiceParams, name: string) {
+    const invoiceName = `${user}_${name}`;
+    const invoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (!invoice) {
+      return false;
+    }
+    return invoiceName;
+  }
+
   async createInvoice(
     createInvoiceDetails: createInvoiceParams,
     user: getInvoiceParams,

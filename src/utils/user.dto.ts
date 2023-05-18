@@ -33,6 +33,13 @@ export class CreateUserDto {
   password: string;
 }
 
+export class EmailDto {
+  @IsEmail()
+  email: string;
+
+  name: string;
+}
+
 export class UserLoginDto {
   @IsNotEmpty()
   @IsEmail()
