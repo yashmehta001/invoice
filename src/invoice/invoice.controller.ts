@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseInterceptors,
   UsePipes,
@@ -46,8 +47,11 @@ export class InvoiceController {
 
   @Get()
   @UsePipes(new ValidationPipe())
-  userInvoice(@Headers('user') user: getInvoicesDto) {
-    return this.invoiceService.getInvoice(user);
+  userInvoice(
+    @Headers('user') user: getInvoicesDto,
+    @Query('page') page: number,
+  ) {
+    return this.invoiceService.getInvoice(user, null, null, page);
   }
 
   @Post('paid')

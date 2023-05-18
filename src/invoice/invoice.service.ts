@@ -1,7 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from 'src/entities/invoice';
-import { logoFolder, pdfFolder, responseMessage } from 'src/utils/constants';
+import {
+  limit,
+  logoFolder,
+  pdfFolder,
+  responseMessage,
+} from 'src/utils/constants';
 import {
   createInvoiceParams,
   getInvoiceParams,
@@ -25,7 +30,9 @@ export class InvoiceService {
     user: getInvoiceParams,
     params: PaymentStatus | null = null,
     invoiceName: string | null = null,
+    page = 1,
   ) {
+    const skip = (page - 1) * limit;
     const userId = String(user);
     const search: typeGetDbSeach = {
       seller_id: userId,
@@ -45,6 +52,8 @@ export class InvoiceService {
         'total',
       ],
       where: search,
+      skip,
+      take: limit,
     });
     if (!invoices.length) {
       return responseMessage.noInvoice;
