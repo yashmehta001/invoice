@@ -60,6 +60,15 @@ export class InvoiceController {
     return responseMessage.invoicePaid;
   }
 
+  @Post('search')
+  @UsePipes(new ValidationPipe())
+  async invoiceSearch(
+    @Headers('user') user: getInvoicesDto,
+    @Body('name') name: string,
+  ) {
+    return this.invoiceService.getInvoice(user, null, name);
+  }
+
   @Post('logo')
   @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('logo'))

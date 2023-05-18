@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { OrderItem, PaymentStatus, currency } from './user.dto';
+import { FindOperator } from 'typeorm';
 
 export type CreateUserParams = {
   firstName: string;
@@ -113,6 +114,7 @@ export type updateInvoiceParams = {
 export type typeGetDbSeach = {
   seller_id: string;
   status?: PaymentStatus;
+  invoice_name?: FindOperator<string>;
 };
 
 export type createPdfParams = {

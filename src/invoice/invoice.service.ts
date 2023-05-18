@@ -8,24 +8,23 @@ import {
   typeGetDbSeach,
   updateInvoiceParams,
 } from 'src/utils/types';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
 import { PaymentStatus } from 'src/utils/user.dto';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
-import { PdfService } from 'src/pdf/pdf.service';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
-    private pdfService: PdfService,
   ) {}
 
   async getInvoice(
     user: getInvoiceParams,
     params: PaymentStatus | null = null,
+    invoiceName: string | null = null,
   ) {
     const userId = String(user);
     const search: typeGetDbSeach = {
@@ -33,6 +32,9 @@ export class InvoiceService {
     };
     if (params) {
       search.status = params;
+    }
+    if (invoiceName) {
+      search.invoice_name = Like(`%${invoiceName}%`);
     }
     const invoices = await this.invoiceRepository.find({
       select: [
