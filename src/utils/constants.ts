@@ -32,6 +32,7 @@ export const responseMessage = {
   emailInvoice: { success: true, message: 'Invoice Emailed to Client!' },
   invoiceSaved: { success: true, message: 'Invoice saved as PDF' },
   deleteInvoice: { success: true, message: 'Invoice Deleted' },
+  invoicePaid: { success: true, message: 'Invoice status turned Paid' },
 };
 
 //PDF

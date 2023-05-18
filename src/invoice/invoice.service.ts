@@ -249,4 +249,18 @@ export class InvoiceService {
     await this.invoiceRepository.remove(invoice);
     return;
   }
+
+  async invoicePaid(user: getInvoiceParams, paidInvoiceName: string) {
+    const invoiceName = `${user}_${paidInvoiceName}`;
+    const invoice = await this.invoiceRepository.findOne({
+      where: { invoice_name: invoiceName },
+    });
+    if (!invoice) {
+      throw new BadRequestException('Invoice Not Found');
+    }
+    invoice.status = PaymentStatus.Paid;
+
+    await this.invoiceRepository.save(invoice);
+    return responseMessage.invoicePaid;
+  }
 }

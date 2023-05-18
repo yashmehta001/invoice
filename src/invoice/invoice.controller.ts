@@ -46,6 +46,15 @@ export class InvoiceController {
     return this.invoiceService.getInvoice(user);
   }
 
+  @Post('paid')
+  async invoicePaind(
+    @Headers('user') user: getInvoicesDto,
+    @Body('name') name: string,
+  ) {
+    await this.invoiceService.invoicePaid(user, name);
+    return responseMessage.invoicePaid;
+  }
+
   @Get(':status')
   @UsePipes(new ValidationPipe())
   userInvoiceStatus(
