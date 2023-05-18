@@ -137,6 +137,6 @@ export class InvoiceController {
     @Param('name') name: string,
   ) {
     await this.invoiceService.deleteInvoice(user, name);
-    return 'Delete';
+    return responseMessage.deleteInvoice;
   }
 }

@@ -31,6 +31,7 @@ export const responseMessage = {
   noInvoice: { success: true, message: 'No invoices stored yet!' },
   emailInvoice: { success: true, message: 'Invoice Emailed to Client!' },
   invoiceSaved: { success: true, message: 'Invoice saved as PDF' },
+  deleteInvoice: { success: true, message: 'Invoice Deleted' },
 };
 
 //PDF
