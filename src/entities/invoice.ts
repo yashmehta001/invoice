@@ -1,5 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import { User } from './users';
+import { PaymentStatus, currency } from 'src/utils/user.dto';
 
 @Entity({ name: 'Invoice' })
 export class Invoice {
@@ -87,17 +89,15 @@ export class Invoice {
   })
   tax: number;
 
-  //change to enum
   @Column({
     default: 'INR',
   })
-  currency: string;
+  currency: currency;
 
-  //change to enum
   @Column({
-    default: 'Outstanding',
+    default: 'outstanding',
   })
-  status: string;
+  status: PaymentStatus;
 
   @Column('json')
   order_items: Array<{ name: string; quantity: number; price: number }>;
@@ -117,4 +117,7 @@ export class Invoice {
     default: new Date(),
   })
   updated_at: Date;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
 }

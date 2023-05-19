@@ -21,6 +21,9 @@ export class MiddlewareMiddleware implements NestMiddleware {
         const user = await this.userRepository.findOne({
           where: { id: data.id },
         });
+        if (!user) {
+          res.send(errorMessage.invalidJwt);
+        }
         req.headers.user = user.id;
         next();
       } catch (e) {

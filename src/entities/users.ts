@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Invoice } from './invoice';
 
 @Entity({ name: 'User' })
 export class User {
@@ -43,4 +44,7 @@ export class User {
     default: new Date(),
   })
   updated_at: Date;
+
+  @OneToMany(() => Invoice, (invoice) => invoice.seller_id)
+  invoice: Invoice[];
 }

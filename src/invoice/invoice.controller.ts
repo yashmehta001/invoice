@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UploadedFile,
   UseInterceptors,
   UsePipes,
@@ -35,6 +36,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
+import { Order } from 'src/utils/types';
 
 @Controller('invoice')
 export class InvoiceController {
@@ -46,8 +48,13 @@ export class InvoiceController {
 
   @Get()
   @UsePipes(new ValidationPipe())
-  userInvoice(@Headers('user') user: getInvoicesDto) {
-    return this.invoiceService.getInvoice(user);
+  userInvoice(
+    @Headers('user') user: getInvoicesDto,
+    @Query('page') page: number,
+    @Query('sortBy') sortBy: string,
+    @Query('sortOrder') sortOrder: Order,
+  ) {
+    return this.invoiceService.getInvoice(user, page, sortBy, sortOrder);
   }
 
   @Post('paid')
@@ -58,6 +65,15 @@ export class InvoiceController {
   ) {
     await this.invoiceService.invoicePaid(user, name);
     return responseMessage.invoicePaid;
+  }
+
+  @Post('search')
+  @UsePipes(new ValidationPipe())
+  async invoiceSearch(
+    @Headers('user') user: getInvoicesDto,
+    @Body('name') name: string,
+  ) {
+    return this.invoiceService.getInvoice(user, 1, null, null, name);
   }
 
   @Post('logo')
@@ -114,7 +130,7 @@ export class InvoiceController {
     @Headers('user') user: getInvoicesDto,
     @Param('status') status: PaymentStatus,
   ) {
-    return this.invoiceService.getInvoice(user, status);
+    return this.invoiceService.getInvoice(user, 1, null, null, null, status);
   }
 
   @Get(':name')

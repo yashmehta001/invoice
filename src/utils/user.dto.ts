@@ -90,8 +90,8 @@ export class OrderItem {
 }
 
 export enum PaymentStatus {
-  Outstanding = 'Outstanding',
-  Paid = 'Paid',
+  Outstanding = 'outstanding',
+  Paid = 'paid',
 }
 
 export enum Action {

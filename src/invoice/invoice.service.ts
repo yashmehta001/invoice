@@ -1,32 +1,42 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from 'src/entities/invoice';
-import { logoFolder, pdfFolder, responseMessage } from 'src/utils/constants';
 import {
+  limit,
+  logoFolder,
+  pdfFolder,
+  responseMessage,
+} from 'src/utils/constants';
+import {
+  Order,
+  Query,
   createInvoiceParams,
   getInvoiceParams,
   typeGetDbSeach,
   updateInvoiceParams,
 } from 'src/utils/types';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
 import { PaymentStatus } from 'src/utils/user.dto';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
-import { PdfService } from 'src/pdf/pdf.service';
 
 @Injectable()
 export class InvoiceService {
   constructor(
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
-    private pdfService: PdfService,
   ) {}
 
   async getInvoice(
     user: getInvoiceParams,
+    page = 1,
+    sortBy: string | null = null,
+    sortOrder: Order | null = null,
+    invoiceName: string | null = null,
     params: PaymentStatus | null = null,
   ) {
+    const skip = (page - 1) * limit;
     const userId = String(user);
     const search: typeGetDbSeach = {
       seller_id: userId,
@@ -34,7 +44,13 @@ export class InvoiceService {
     if (params) {
       search.status = params;
     }
-    const invoices = await this.invoiceRepository.find({
+    if (invoiceName) {
+      search.client_name = Like(`%${invoiceName}%`);
+    }
+    const order = {
+      [sortBy]: sortOrder,
+    };
+    const dbQuery: Query = {
       select: [
         'invoice_name',
         'client_name',
@@ -43,7 +59,13 @@ export class InvoiceService {
         'total',
       ],
       where: search,
-    });
+      skip,
+      take: limit,
+    };
+    if (JSON.stringify(order) != JSON.stringify({ null: null })) {
+      dbQuery.order = order;
+    }
+    const invoices = await this.invoiceRepository.find(dbQuery);
     if (!invoices.length) {
       return responseMessage.noInvoice;
     }
@@ -52,11 +74,10 @@ export class InvoiceService {
       const parts = invoice.invoice_name.split('_');
       invoice.invoice_name = parts[1];
       if (invoice.status == PaymentStatus.Outstanding) {
-        total += invoice.total;
+        total += +invoice.total;
       }
     });
     return { invoices, total };
-    //to-do add remaining code
   }
 
   async getInvoiceDetails(user: getInvoiceParams, name: string) {
@@ -67,6 +88,7 @@ export class InvoiceService {
     if (!isInvoice) {
       throw new BadRequestException('Invoice Not Found');
     }
+    isInvoice.invoice_name = name;
     delete isInvoice.created_at;
     delete isInvoice.updated_at;
     return isInvoice;

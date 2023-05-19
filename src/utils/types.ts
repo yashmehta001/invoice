@@ -1,5 +1,7 @@
 import * as fs from 'fs';
 import { OrderItem, PaymentStatus, currency } from './user.dto';
+import { FindManyOptions, FindOperator } from 'typeorm';
+import { Invoice } from 'src/entities/invoice';
 
 export type CreateUserParams = {
   firstName: string;
@@ -113,6 +115,7 @@ export type updateInvoiceParams = {
 export type typeGetDbSeach = {
   seller_id: string;
   status?: PaymentStatus;
+  client_name?: FindOperator<string>;
 };
 
 export type createPdfParams = {
@@ -147,3 +150,9 @@ export type attachmentParams = {
   filename: string;
   content: fs.ReadStream;
 };
+
+export type Order = {
+  sortOrder: 'ASC' | 'DESC';
+};
+
+export type Query = FindManyOptions<Invoice>;
