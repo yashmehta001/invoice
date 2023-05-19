@@ -9,6 +9,7 @@ import {
 } from 'src/utils/constants';
 import {
   Order,
+  Query,
   createInvoiceParams,
   getInvoiceParams,
   typeGetDbSeach,
@@ -44,13 +45,12 @@ export class InvoiceService {
       search.status = params;
     }
     if (invoiceName) {
-      search.invoice_name = Like(`%${invoiceName}%`);
+      search.client_name = Like(`%${invoiceName}%`);
     }
     const order = {
       [sortBy]: sortOrder,
     };
-
-    const invoices = await this.invoiceRepository.find({
+    const dbQuery: Query = {
       select: [
         'invoice_name',
         'client_name',
@@ -61,8 +61,11 @@ export class InvoiceService {
       where: search,
       skip,
       take: limit,
-      order,
-    });
+    };
+    if (JSON.stringify(order) != JSON.stringify({ null: null })) {
+      dbQuery.order = order;
+    }
+    const invoices = await this.invoiceRepository.find(dbQuery);
     if (!invoices.length) {
       return responseMessage.noInvoice;
     }
@@ -85,6 +88,7 @@ export class InvoiceService {
     if (!isInvoice) {
       throw new BadRequestException('Invoice Not Found');
     }
+    isInvoice.invoice_name = name;
     delete isInvoice.created_at;
     delete isInvoice.updated_at;
     return isInvoice;

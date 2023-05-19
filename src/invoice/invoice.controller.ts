@@ -73,7 +73,7 @@ export class InvoiceController {
     @Headers('user') user: getInvoicesDto,
     @Body('name') name: string,
   ) {
-    return this.invoiceService.getInvoice(user, null, null, null, name);
+    return this.invoiceService.getInvoice(user, 1, null, null, name);
   }
 
   @Post('logo')
@@ -130,7 +130,7 @@ export class InvoiceController {
     @Headers('user') user: getInvoicesDto,
     @Param('status') status: PaymentStatus,
   ) {
-    return this.invoiceService.getInvoice(user, null, null, null, status);
+    return this.invoiceService.getInvoice(user, 1, null, null, null, status);
   }
 
   @Get(':name')
