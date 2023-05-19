@@ -71,9 +71,13 @@ export class InvoiceController {
   @UsePipes(new ValidationPipe())
   async invoiceSearch(
     @Headers('user') user: getInvoicesDto,
+    @Query('page') page: number,
     @Body('name') name: string,
   ) {
-    return this.invoiceService.getInvoice(user, 1, null, null, name);
+    if (!page) {
+      page = 1;
+    }
+    return this.invoiceService.getInvoice(user, page, null, null, name);
   }
 
   @Post('logo')
@@ -128,9 +132,13 @@ export class InvoiceController {
   @UsePipes(new ValidationPipe())
   userInvoiceStatus(
     @Headers('user') user: getInvoicesDto,
+    @Query('page') page: number,
     @Param('status') status: PaymentStatus,
   ) {
-    return this.invoiceService.getInvoice(user, 1, null, null, null, status);
+    if (!page) {
+      page = 1;
+    }
+    return this.invoiceService.getInvoice(user, page, null, null, null, status);
   }
 
   @Get(':name')
@@ -168,8 +176,9 @@ export class InvoiceController {
         emailInvoiceText,
         attachments,
       );
+      return responseMessage.emailInvoice;
     }
-    return responseMessage.emailInvoice;
+    return responseMessage.invoiceSaved;
   }
 
   @Put(':name/:action')
