@@ -176,8 +176,9 @@ export class InvoiceController {
         emailInvoiceText,
         attachments,
       );
+      return responseMessage.emailInvoice;
     }
-    return responseMessage.emailInvoice;
+    return responseMessage.invoiceSaved;
   }
 
   @Put(':name/:action')
