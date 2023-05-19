@@ -11,29 +11,33 @@ export class EmailService {
     text: string,
     attachments: attachmentParams[] | null,
   ): Promise<void> {
-    const transporter = nodemailer.createTransport({
-      service: email.emailService,
-      auth: {
-        user: email.email,
-        pass: email.password,
-      },
-    });
-    await transporter.sendMail(
-      {
-        from: email.email,
-        to,
-        subject,
-        text,
-        attachments: attachments,
-      },
-      function (err: any, info: { response: string }) {
-        if (err) {
-          console.log(err);
+    try {
+      const transporter = nodemailer.createTransport({
+        service: email.emailService,
+        auth: {
+          user: email.email,
+          pass: email.password,
+        },
+      });
+      await transporter.sendMail(
+        {
+          from: email.email,
+          to,
+          subject,
+          text,
+          attachments: attachments,
+        },
+        function (err: any, info: { response: string }) {
+          if (err) {
+            console.log(err);
+            return;
+          }
+          console.log('Email sent ' + info.response);
           return;
-        }
-        console.log('Email sent ' + info.response);
-        return;
-      },
-    );
+        },
+      );
+    } catch (e) {
+      return e;
+    }
   }
 }
