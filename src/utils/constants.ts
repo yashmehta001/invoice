@@ -42,4 +42,4 @@ export const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
 export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
 
 //Database
-export const limit = 1;
+export const limit = 10;

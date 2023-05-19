@@ -8,6 +8,7 @@ import {
   responseMessage,
 } from 'src/utils/constants';
 import {
+  Order,
   createInvoiceParams,
   getInvoiceParams,
   typeGetDbSeach,
@@ -28,9 +29,11 @@ export class InvoiceService {
 
   async getInvoice(
     user: getInvoiceParams,
-    params: PaymentStatus | null = null,
-    invoiceName: string | null = null,
     page = 1,
+    sortBy: string | null = null,
+    sortOrder: Order | null = null,
+    invoiceName: string | null = null,
+    params: PaymentStatus | null = null,
   ) {
     const skip = (page - 1) * limit;
     const userId = String(user);
@@ -43,6 +46,10 @@ export class InvoiceService {
     if (invoiceName) {
       search.invoice_name = Like(`%${invoiceName}%`);
     }
+    const order = {
+      [sortBy]: sortOrder,
+    };
+
     const invoices = await this.invoiceRepository.find({
       select: [
         'invoice_name',
@@ -54,6 +61,7 @@ export class InvoiceService {
       where: search,
       skip,
       take: limit,
+      order,
     });
     if (!invoices.length) {
       return responseMessage.noInvoice;
@@ -63,11 +71,10 @@ export class InvoiceService {
       const parts = invoice.invoice_name.split('_');
       invoice.invoice_name = parts[1];
       if (invoice.status == PaymentStatus.Outstanding) {
-        total += invoice.total;
+        total += +invoice.total;
       }
     });
     return { invoices, total };
-    //to-do add remaining code
   }
 
   async getInvoiceDetails(user: getInvoiceParams, name: string) {

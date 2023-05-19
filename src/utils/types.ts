@@ -149,3 +149,7 @@ export type attachmentParams = {
   filename: string;
   content: fs.ReadStream;
 };
+
+export type Order = {
+  sortOrder: 'ASC' | 'DESC';
+};
