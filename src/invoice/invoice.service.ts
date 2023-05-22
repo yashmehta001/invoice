@@ -34,8 +34,8 @@ export class InvoiceService {
     page = 1,
     sortBy: string | null = null,
     sortOrder: Order | null = null,
-    invoiceName: string | null = null,
     params: PaymentStatus | null = null,
+    invoiceName: string | null = null,
   ) {
     try {
       const skip = (page - 1) * limit;
@@ -49,6 +49,7 @@ export class InvoiceService {
       if (invoiceName) {
         search.client_name = Like(`%${invoiceName}%`);
       }
+      console.log(search);
       const order = {
         [sortBy]: sortOrder,
       };
