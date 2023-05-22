@@ -19,7 +19,7 @@ import {
   createUserSubject,
   createUserText,
 } from 'src/utils/constants';
-import { constants } from 'src/config/config';
+import { userConstants } from 'src/config/config';
 
 @Injectable()
 export class UsersService {
@@ -39,12 +39,9 @@ export class UsersService {
       const now = new Date();
       const password = await bcrypt.hash(
         createUserDetails.password,
-        constants.saltRounds,
+        userConstants.saltRounds,
       );
       const code = Math.floor(Math.random() * 900000) + 100000;
-      const codeExpiry = now;
-      const createdAt = now;
-      const updatedAt = now;
 
       const newUser = this.userRepository.create({
         first_name: createUserDetails.firstName,
@@ -53,9 +50,9 @@ export class UsersService {
         password: password,
         is_verified: false,
         code: code,
-        code_created_at: codeExpiry,
-        created_at: createdAt,
-        updated_at: updatedAt,
+        code_created_at: now,
+        created_at: now,
+        updated_at: now,
       });
 
       await this.userRepository.save(newUser);
@@ -91,7 +88,7 @@ export class UsersService {
         return errorMessage.emailNotVerified;
       }
       const payload = { id: user.id };
-      const accessToken = jwt.sign(payload, constants.jwtSecret);
+      const accessToken = jwt.sign(payload, userConstants.jwtSecret);
       return { ...responseMessage.userLogin, accessToken };
     } catch (e) {
       return e;
@@ -118,7 +115,7 @@ export class UsersService {
         return errorMessage.isNotVerified;
       }
 
-      if (+now > +codeCreatedAt + constants.codeExpiryTime) {
+      if (+now > +codeCreatedAt + userConstants.codeExpiryTime) {
         this.resendEmail({ email });
         return errorMessage.codeExpired;
       }

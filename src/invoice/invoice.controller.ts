@@ -57,16 +57,6 @@ export class InvoiceController {
     return this.invoiceService.getInvoice(user, page, sortBy, sortOrder);
   }
 
-  @Post('paid')
-  @UsePipes(new ValidationPipe())
-  async invoicePaind(
-    @Headers('user') user: getInvoicesDto,
-    @Body('name') name: string,
-  ) {
-    await this.invoiceService.invoicePaid(user, name);
-    return responseMessage.invoicePaid;
-  }
-
   @Post('search')
   @UsePipes(new ValidationPipe())
   async invoiceSearch(
@@ -78,6 +68,29 @@ export class InvoiceController {
       page = 1;
     }
     return this.invoiceService.getInvoice(user, page, null, null, name);
+  }
+
+  @Get('status/:status')
+  @UsePipes(new ValidationPipe())
+  userInvoiceStatus(
+    @Headers('user') user: getInvoicesDto,
+    @Query('page') page: number,
+    @Param('status') status: PaymentStatus,
+  ) {
+    if (!page) {
+      page = 1;
+    }
+    return this.invoiceService.getInvoice(user, page, null, null, null, status);
+  }
+
+  @Post('paid')
+  @UsePipes(new ValidationPipe())
+  async invoicePaind(
+    @Headers('user') user: getInvoicesDto,
+    @Body('name') name: string,
+  ) {
+    await this.invoiceService.invoicePaid(user, name);
+    return responseMessage.invoicePaid;
   }
 
   @Post('logo')
@@ -126,19 +139,6 @@ export class InvoiceController {
       attachments,
     );
     return responseMessage.emailInvoice;
-  }
-
-  @Get('status/:status')
-  @UsePipes(new ValidationPipe())
-  userInvoiceStatus(
-    @Headers('user') user: getInvoicesDto,
-    @Query('page') page: number,
-    @Param('status') status: PaymentStatus,
-  ) {
-    if (!page) {
-      page = 1;
-    }
-    return this.invoiceService.getInvoice(user, page, null, null, null, status);
   }
 
   @Get(':name')
