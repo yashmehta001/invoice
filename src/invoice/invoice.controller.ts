@@ -53,34 +53,17 @@ export class InvoiceController {
     @Query('page') page: number,
     @Query('sortBy') sortBy: string,
     @Query('sortOrder') sortOrder: Order,
+    @Query('status') status: PaymentStatus,
+    @Query('search') search: string,
   ) {
-    return this.invoiceService.getInvoice(user, page, sortBy, sortOrder);
-  }
-
-  @Post('search')
-  @UsePipes(new ValidationPipe())
-  async invoiceSearch(
-    @Headers('user') user: getInvoicesDto,
-    @Query('page') page: number,
-    @Body('name') name: string,
-  ) {
-    if (!page) {
-      page = 1;
-    }
-    return this.invoiceService.getInvoice(user, page, null, null, name);
-  }
-
-  @Get('status/:status')
-  @UsePipes(new ValidationPipe())
-  userInvoiceStatus(
-    @Headers('user') user: getInvoicesDto,
-    @Query('page') page: number,
-    @Param('status') status: PaymentStatus,
-  ) {
-    if (!page) {
-      page = 1;
-    }
-    return this.invoiceService.getInvoice(user, page, null, null, null, status);
+    return this.invoiceService.getInvoice(
+      user,
+      page,
+      sortBy,
+      sortOrder,
+      status,
+      search,
+    );
   }
 
   @Post('paid')
