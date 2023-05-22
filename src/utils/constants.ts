@@ -21,6 +21,7 @@ export const errorMessage = {
   isNotVerified: { success: false, message: 'Invalid OTP' },
   invalidJwt: { success: false, message: 'JWT failed. Re-login' },
   emailPDF: { success: false, message: 'PDF not Found' },
+  invoiceExists: { success: false, message: 'Invoice Name should be Unique' },
 };
 
 //Success Responses
@@ -42,4 +43,4 @@ export const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
 export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
 
 //Database
-export const limit = 1;
+export const limit = 10;

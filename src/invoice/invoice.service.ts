@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Invoice } from 'src/entities/invoice';
 import {
+  errorMessage,
   limit,
   logoFolder,
   pdfFolder,
@@ -127,7 +128,7 @@ export class InvoiceService {
         where: { invoice_name: invoiceName },
       });
       if (isInvoice) {
-        throw new BadRequestException('Invoice Name should be Unique');
+        return errorMessage.invoiceExists;
       }
       const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
       const orderItems = createInvoiceDetails.orderItem;
@@ -161,7 +162,6 @@ export class InvoiceService {
         created_at: new Date(),
         updated_at: new Date(),
       };
-
       return await this.invoiceRepository.save(invoice);
     } catch (e) {
       return e;
