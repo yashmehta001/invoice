@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as jwt from 'jsonwebtoken';
-import { constants } from 'src/config/config';
+import { userConstants } from 'src/config/config';
 import { User } from 'src/entities/users';
 import { errorMessage } from 'src/utils/constants';
 import { Repository } from 'typeorm';
@@ -13,7 +13,7 @@ export class MiddlewareMiddleware implements NestMiddleware {
   ) {}
   use(req: any, res: any, next: () => void) {
     const token: string = req.headers['accesstoken'] as string;
-    jwt.verify(token, constants.jwtSecret, async (err, data: any) => {
+    jwt.verify(token, userConstants.jwtSecret, async (err, data: any) => {
       try {
         if (!token || err) {
           return errorMessage.invalidJwt;
