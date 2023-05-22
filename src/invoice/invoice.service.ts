@@ -49,7 +49,6 @@ export class InvoiceService {
       if (invoiceName) {
         search.client_name = Like(`%${invoiceName}%`);
       }
-      console.log(search);
       const order = {
         [sortBy]: sortOrder,
       };
