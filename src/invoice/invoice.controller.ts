@@ -96,7 +96,7 @@ export class InvoiceController {
     }
   }
 
-  @Post('email')
+  @Post('user/email')
   @UsePipes(new ValidationPipe())
   async emailInvoice(
     @Headers('user') user: getInvoicesDto,
@@ -161,8 +161,10 @@ export class InvoiceController {
       invoiceDetailsDto,
       user,
     );
+    if (!invoice.success) {
+      return invoice;
+    }
     const pdfPath = await this.pdfService.generatePdf(invoice);
-
     if (action == 'email') {
       const attachments = [
         {

@@ -21,4 +21,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Specify the command to run the NestJS application
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start:dev"]
