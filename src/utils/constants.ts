@@ -22,6 +22,18 @@ export const errorMessage = {
   invalidJwt: { success: false, message: 'JWT failed. Re-login' },
   emailPDF: { success: false, message: 'PDF not Found' },
   invoiceExists: { success: false, message: 'Invoice Name should be Unique' },
+  invalidLogoFileType: {
+    success: false,
+    message: 'File type should be JPG or PNG',
+  },
+  invalidLogoFileSize: {
+    success: false,
+    message: 'File size should not exceed 2MB',
+  },
+  invalidLogoFileNull: {
+    success: false,
+    message: 'File not found',
+  },
 };
 
 //Success Responses
@@ -35,6 +47,9 @@ export const responseMessage = {
   invoiceSaved: { success: true, message: 'Invoice saved as PDF' },
   deleteInvoice: { success: true, message: 'Invoice Deleted' },
   invoicePaid: { success: true, message: 'Invoice status turned Paid' },
+  validLogoFile: { success: true, message: 'Ok' },
+  validLogoSaved: { success: true, message: 'Logo Saved' },
+  getInvoice: { success: true, message: 'Invoice Found' },
 };
 
 //PDF

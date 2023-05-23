@@ -79,7 +79,11 @@ export class InvoiceService {
           total += +invoice.total;
         }
       });
-      return { invoices, total };
+      return {
+        ...responseMessage.getInvoice,
+        invoices,
+        total,
+      };
     } catch (e) {
       return e;
     }
@@ -97,7 +101,7 @@ export class InvoiceService {
       isInvoice.invoice_name = name;
       delete isInvoice.created_at;
       delete isInvoice.updated_at;
-      return isInvoice;
+      return { ...responseMessage.getInvoice, invoice: isInvoice };
     } catch (e) {
       return e;
     }
@@ -168,24 +172,22 @@ export class InvoiceService {
     }
   }
 
-  async checkFile(file: Express.Multer.File): Promise<void> {
+  async checkFile(file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('File not found');
+      return errorMessage.invalidLogoFileNull;
     }
 
     if (file.size > 2000000) {
-      throw new BadRequestException('File size should not exceed 2MB');
+      return errorMessage.invalidLogoFileSize;
     }
     const fileType = file.originalname.split('.').pop();
     if (fileType !== 'jpg' && fileType !== 'png') {
-      throw new BadRequestException('File type should be JPG or PNG');
+      return errorMessage.invalidLogoFileType;
     }
+    return responseMessage.validLogoFile;
   }
 
-  async saveFile(
-    user: getInvoiceParams,
-    file: Express.Multer.File,
-  ): Promise<string> {
+  async saveFile(user: getInvoiceParams, file: Express.Multer.File) {
     const filename = `${user}_${uuidv4()}${path.extname(file.originalname)}`;
     const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
     if (!fs.existsSync(logoFolder)) {

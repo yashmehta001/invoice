@@ -83,13 +83,12 @@ export class InvoiceController {
     @Headers('user') user: getInvoicesDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    try {
-      await this.invoiceService.checkFile(file);
-      const filename = await this.invoiceService.saveFile(user, file);
-      return { success: true, filename };
-    } catch (error) {
-      throw new BadRequestException(error.message);
+    const checkFile = await this.invoiceService.checkFile(file);
+    if (!checkFile.success) {
+      return checkFile;
     }
+    const filename = await this.invoiceService.saveFile(user, file);
+    return { ...responseMessage.validLogoSaved, filename };
   }
 
   @Post('user/email')
