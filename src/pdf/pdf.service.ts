@@ -13,7 +13,6 @@ export class PdfService {
     const pdfPath: string = path.join(pdfFolder, '/', pdfName);
     invoice.invoice_number = invoice.invoice_number.split('_')[1];
     invoice.logo = logoFolder + invoice.logo;
-    console.log(invoice.logo);
     const templatePath = 'src/pdf/pdf.ejs';
 
     const html = await ejs.renderFile(templatePath, { invoice });
@@ -28,7 +27,6 @@ export class PdfService {
     const pdfBuffer = await page.pdf();
     await fs.promises.writeFile(pdfPath, pdfBuffer);
     await browser.close();
-    console.log('PDF created successfully.');
     return pdfPath;
   }
   // if (logo) {

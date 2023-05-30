@@ -143,12 +143,11 @@ export class InvoiceController {
       invoiceDetailsDto,
       user,
     );
-    if (!invoice.success == false) {
+    if (invoice.success == false) {
       return invoice;
     }
     const pdfPath = await this.pdfService.generatePdf(invoice);
     if (action == 'email') {
-      console.log('.........................');
       const attachments = [
         {
           filename: uuid(),
