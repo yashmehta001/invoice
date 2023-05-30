@@ -12,7 +12,7 @@ export const database = {
 };
 
 export const userConstants = {
-  codeExpiryTime: +process.env.CODE_EXPIRY_TIME * 60 * 1000,
+  otpExpiryTime: +process.env.CODE_EXPIRY_TIME * 60 * 1000,
   saltRounds: +process.env.SALTROUND,
   jwtSecret: process.env.JWTSECRET,
 };

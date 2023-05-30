@@ -1,6 +1,5 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
-import { User } from './users';
 import { PaymentStatus, currency } from 'src/utils/user.dto';
 
 @Entity({ name: 'Invoice' })
@@ -8,86 +7,80 @@ export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  seller_name: string;
-
-  @Column({
-    default: uuid(),
-    unique: true,
-  })
-  invoice_name: string;
-
-  @Column()
-  seller_id: string;
-
-  @Column()
-  seller_email: string;
-
-  @Column({
-    default: new Date(),
-  })
-  billing_date: Date;
-
-  @Column({
-    nullable: true,
-  })
-  seller_address_1: string;
-
-  @Column({
-    nullable: true,
-  })
-  seller_address_2: string;
-
-  @Column({
-    nullable: true,
-  })
-  seller_address_3: string;
-
-  @Column({
-    nullable: true,
-  })
-  seller_mobile: string;
-
-  @Column({
-    nullable: true,
-  })
-  seller_gst: string;
-
   @Column({
     nullable: true,
   })
   logo: string;
 
+  @Column({
+    default: uuid(),
+  })
+  invoice_name: string;
+
   @Column()
-  client_name: string;
+  from_id: string;
 
   @Column()
-  client_email: string;
+  from_name: string;
+
+  @Column()
+  from_email: string;
 
   @Column({
     nullable: true,
   })
-  client_address_1: string;
+  from_address: string;
 
   @Column({
     nullable: true,
   })
-  client_address_2: string;
+  from_mobile: string;
 
   @Column({
     nullable: true,
   })
-  client_address_3: string;
+  from_business_id: string;
+
+  @Column()
+  to_name: string;
+
+  @Column()
+  to_email: string;
 
   @Column({
     nullable: true,
   })
-  client_mobile: string;
+  to_address: string;
 
   @Column({
-    default: 0,
+    nullable: true,
   })
-  tax: number;
+  to_mobile: string;
+
+  @Column({
+    unique: true,
+  })
+  invoice_number: string;
+
+  @Column({
+    default: new Date(),
+  })
+  issue_date: Date;
+
+  @Column('json')
+  order_items: Array<{ name: string; quantity: number; price: number }>;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  tax_rate: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  sub_total: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  tax_amount: number;
+
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  total: number;
 
   @Column({
     default: 'INR',
@@ -99,15 +92,6 @@ export class Invoice {
   })
   status: PaymentStatus;
 
-  @Column('json')
-  order_items: Array<{ name: string; quantity: number; price: number }>;
-
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  sub_total: number;
-
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  total: number;
-
   @Column({
     default: new Date(),
   })
@@ -117,7 +101,4 @@ export class Invoice {
     default: new Date(),
   })
   updated_at: Date;
-
-  @ManyToOne(() => User, (user) => user.id)
-  user: User;
 }

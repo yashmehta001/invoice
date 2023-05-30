@@ -16,12 +16,12 @@ export const errorMessage = {
     success: false,
     message: 'Email Not Verified. Resent Email',
   },
-  codeExpired: { success: false, message: 'Code Expired. Email Resent' },
+  otpExpired: { success: false, message: 'Code Expired. Email Resent' },
   isVerified: { success: false, message: 'Email already verified' },
   isNotVerified: { success: false, message: 'Invalid OTP' },
   invalidJwt: { success: false, message: 'JWT failed. Re-login' },
   emailPDF: { success: false, message: 'PDF not Found' },
-  invoiceExists: { success: false, message: 'Invoice Name should be Unique' },
+  invoiceExists: { success: false, message: 'Invoice Number should be Unique' },
   invalidLogoFileType: {
     success: false,
     message: 'File type should be JPG or PNG',
@@ -55,7 +55,7 @@ export const responseMessage = {
 //PDF
 export const filename = path.join(__dirname, '..', '..', 'files');
 export const pdfFolder = path.join(__dirname, '..', '..', 'files', 'pdf');
-export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
+export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos/');
 
 //Database
 export const limit = 10;

@@ -1,5 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Invoice } from './invoice';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'User' })
 export class User {
@@ -23,17 +22,17 @@ export class User {
   @Column({
     default: false,
   })
-  is_verified: boolean;
+  is_email_verified: boolean;
 
   @Column({
     nullable: true,
   })
-  code: number;
+  otp: number;
 
   @Column({
     nullable: true,
   })
-  code_created_at: Date;
+  otp_created_at: Date;
 
   @Column({
     default: new Date(),
@@ -44,7 +43,4 @@ export class User {
     default: new Date(),
   })
   updated_at: Date;
-
-  @OneToMany(() => Invoice, (invoice) => invoice.seller_id)
-  invoice: Invoice[];
 }
