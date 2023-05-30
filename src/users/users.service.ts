@@ -41,16 +41,16 @@ export class UsersService {
         createUserDetails.password,
         userConstants.saltRounds,
       );
-      const code = Math.floor(Math.random() * 900000) + 100000;
+      const otp = Math.floor(Math.random() * 900000) + 100000;
 
       const newUser = this.userRepository.create({
         first_name: createUserDetails.firstName,
         last_name: createUserDetails.lastName,
         email: email,
         password: password,
-        is_verified: false,
-        code: code,
-        code_created_at: now,
+        is_email_verified: false,
+        otp: otp,
+        otp_created_at: now,
         created_at: now,
         updated_at: now,
       });
@@ -59,7 +59,7 @@ export class UsersService {
       await this.emailService.sendEmail(
         email,
         createUserSubject,
-        createUserText + code,
+        createUserText + otp,
         null,
       );
       return responseMessage.userCreation;
@@ -83,7 +83,7 @@ export class UsersService {
       if (!verifyPassword) {
         return errorMessage.login;
       }
-      if (!user.is_verified) {
+      if (!user.is_email_verified) {
         this.resendEmail({ email });
         return errorMessage.emailNotVerified;
       }
@@ -100,29 +100,29 @@ export class UsersService {
       const email = userVerificationDetails.email.toLowerCase();
       const now = new Date().getTime();
       const user = await this.userRepository.findOne({ where: { email } });
-      const codeCreatedAt = new Date(user.code_created_at);
+      const otpCreatedAt = new Date(user.otp_created_at);
       const id = user.id;
 
       if (!user) {
         return errorMessage.emailNotFound;
       }
 
-      if (user.is_verified) {
+      if (user.is_email_verified) {
         return errorMessage.isVerified;
       }
 
-      if (+userVerificationDetails.code != user.code) {
+      if (+userVerificationDetails.otp != user.otp) {
         return errorMessage.isNotVerified;
       }
 
-      if (+now > +codeCreatedAt + userConstants.codeExpiryTime) {
+      if (+now > +otpCreatedAt + userConstants.otpExpiryTime) {
         this.resendEmail({ email });
-        return errorMessage.codeExpired;
+        return errorMessage.otpExpired;
       }
 
-      user.is_verified = true;
-      user.code = null;
-      user.code_created_at = null;
+      user.is_email_verified = true;
+      user.otp = null;
+      user.otp_created_at = null;
 
       await this.userRepository.update({ id }, { ...user });
       return responseMessage.userVerification;
@@ -134,7 +134,7 @@ export class UsersService {
   async resendEmail(resendEmailDetails: resendEmailParams) {
     try {
       const email = resendEmailDetails.email.toLowerCase();
-      const code = Math.floor(Math.random() * 900000) + 100000;
+      const otp = Math.floor(Math.random() * 900000) + 100000;
       const user = await this.userRepository.findOne({ where: { email } });
       const id = user.id;
 
@@ -142,20 +142,20 @@ export class UsersService {
         return errorMessage.emailNotFound;
       }
 
-      if (user.is_verified) {
+      if (user.is_email_verified) {
         return errorMessage.isVerified;
       }
 
       await this.emailService.sendEmail(
         email,
         createUserSubject,
-        createUserText + code,
+        createUserText + otp,
         null,
       );
 
-      user.code = null;
-      user.code_created_at = new Date();
-      user.code = code;
+      user.otp = null;
+      user.otp_created_at = new Date();
+      user.otp = otp;
 
       await this.userRepository.update({ id }, { ...user });
       return responseMessage.resendEmail;

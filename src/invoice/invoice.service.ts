@@ -35,31 +35,25 @@ export class InvoiceService {
     sortBy: string | null = null,
     sortOrder: Order | null = null,
     params: PaymentStatus | null = null,
-    invoiceName: string | null = null,
+    invoiceNumber: string | null = null,
   ) {
     try {
       const skip = (page - 1) * limit;
       const userId = String(user);
       const search: typeGetDbSeach = {
-        seller_id: userId,
+        from_id: userId,
       };
       if (params) {
         search.status = params;
       }
-      if (invoiceName) {
-        search.client_name = Like(`%${invoiceName}%`);
+      if (invoiceNumber) {
+        search.to_name = Like(`%${invoiceNumber}%`);
       }
       const order = {
         [sortBy]: sortOrder,
       };
       const dbQuery: Query = {
-        select: [
-          'invoice_name',
-          'client_name',
-          'billing_date',
-          'status',
-          'total',
-        ],
+        select: ['invoice_number', 'to_name', 'issue_date', 'status', 'total'],
         where: search,
         skip,
         take: limit,
@@ -73,8 +67,7 @@ export class InvoiceService {
       }
       let total = 0;
       invoices.forEach((invoice) => {
-        const parts = invoice.invoice_name.split('_');
-        invoice.invoice_name = parts[1];
+        invoice.invoice_number = invoice.invoice_number.split('_')[1];
         if (invoice.status == PaymentStatus.Outstanding) {
           total += +invoice.total;
         }
@@ -91,14 +84,14 @@ export class InvoiceService {
 
   async getInvoiceDetails(user: getInvoiceParams, name: string) {
     try {
-      const invoiceName = `${user}_${name}`;
+      const invoiceNumber = `${user}_${name}`;
       const isInvoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_number: invoiceNumber },
       });
       if (!isInvoice) {
         throw new BadRequestException('Invoice Not Found');
       }
-      isInvoice.invoice_name = name;
+      isInvoice.invoice_number = name;
       delete isInvoice.created_at;
       delete isInvoice.updated_at;
       return { ...responseMessage.getInvoice, invoice: isInvoice };
@@ -109,14 +102,14 @@ export class InvoiceService {
 
   async checkInvoice(user: getInvoiceParams, name: string) {
     try {
-      const invoiceName = `${user}_${name}`;
+      const invoiceNumber = `${user}_${name}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_number: invoiceNumber },
       });
       if (!invoice) {
         return false;
       }
-      return invoiceName;
+      return invoiceNumber;
     } catch (e) {
       return e;
     }
@@ -127,9 +120,9 @@ export class InvoiceService {
     user: getInvoiceParams,
   ) {
     try {
-      const invoiceName = `${user}_${createInvoiceDetails.invoiceName}`;
+      const invoiceNumber = `${user}_${createInvoiceDetails.invoiceNumber}`;
       const isInvoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_number: invoiceNumber },
       });
       if (isInvoice) {
         return errorMessage.invoiceExists;
@@ -137,31 +130,30 @@ export class InvoiceService {
       const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
       const orderItems = createInvoiceDetails.orderItem;
       const subTotalAmount = mapper.calculateTotalAmount(orderItems);
-      const total = subTotalAmount + (subTotalAmount * tax) / 100;
+      const taxAmount = subTotalAmount * (tax / 100);
+      const total = subTotalAmount + taxAmount;
       const logo = createInvoiceDetails.logo;
       const invoice = {
-        seller_name: createInvoiceDetails.sellerName,
-        invoice_name: invoiceName,
-        seller_id: user.toString(),
-        seller_email: createInvoiceDetails.sellerEmail,
-        billing_date: new Date(createInvoiceDetails.billingDate),
-        seller_address_1: createInvoiceDetails.sellerAddress1,
-        seller_address_2: createInvoiceDetails.sellerAddress2,
-        seller_address_3: createInvoiceDetails.sellerAddress3,
-        seller_mobile: createInvoiceDetails.sellerMobile,
-        seller_gst: createInvoiceDetails.sellerGst,
         logo: logo,
-        client_name: createInvoiceDetails.clientName,
-        client_email: createInvoiceDetails.clientEmail,
-        client_address_1: createInvoiceDetails.clientAddress1,
-        client_address_2: createInvoiceDetails.clientAddress2,
-        client_address_3: createInvoiceDetails.clientAddress3,
-        client_mobile: createInvoiceDetails.clientMobile,
-        order_items: orderItems,
-        tax: tax,
+        invoice_name: createInvoiceDetails.invoiceName,
+        from_id: user.toString(),
+        from_name: createInvoiceDetails.fromName,
+        from_email: createInvoiceDetails.fromEmail,
+        from_address: createInvoiceDetails.fromAddress,
+        from_mobile: createInvoiceDetails.fromMobile,
+        from_business_id: createInvoiceDetails.fromBusinessId,
+        to_name: createInvoiceDetails.toName,
+        to_email: createInvoiceDetails.toEmail,
+        to_address: createInvoiceDetails.toAddress,
+        to_mobile: createInvoiceDetails.toMobile,
+        invoice_number: invoiceNumber,
+        issue_date: new Date(createInvoiceDetails.issueDate),
         currency: createInvoiceDetails.currency,
         status: createInvoiceDetails.status,
+        order_items: orderItems,
+        tax_rate: tax,
         sub_total: subTotalAmount,
+        tax_amount: taxAmount,
         total: total,
         created_at: new Date(),
         updated_at: new Date(),
@@ -198,14 +190,14 @@ export class InvoiceService {
   }
 
   async updateInvoice(
-    updateInvoiceName: string,
+    updateInvoiceNumber: string,
     updateInvoiceDetails: updateInvoiceParams,
     user: getInvoiceParams,
   ) {
     try {
-      const invoiceName = `${user}_${updateInvoiceName}`;
+      const invoiceNumber = `${user}_${updateInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_number: invoiceNumber },
       });
       if (!invoice) {
         throw new BadRequestException('Invoice Not Found');
@@ -214,62 +206,49 @@ export class InvoiceService {
         invoice.sub_total = mapper.calculateTotalAmount(
           updateInvoiceDetails.orderItem,
         );
-        invoice.total =
-          invoice.sub_total +
-          (invoice.sub_total * updateInvoiceDetails.tax) / 100;
+        invoice.tax_amount = invoice.sub_total * (invoice.tax_rate / 100);
+        invoice.total = invoice.sub_total + invoice.tax_amount;
       }
-      invoice.seller_name = updateInvoiceDetails.sellerName
-        ? updateInvoiceDetails.sellerName
-        : invoice.seller_name;
-      invoice.invoice_name = invoiceName;
-      invoice.seller_email = updateInvoiceDetails.sellerEmail
-        ? updateInvoiceDetails.sellerEmail
-        : invoice.seller_email;
-      invoice.billing_date = updateInvoiceDetails.billingDate
-        ? new Date(updateInvoiceDetails.billingDate)
-        : invoice.billing_date;
-      invoice.seller_address_1 = updateInvoiceDetails.sellerAddress1
-        ? updateInvoiceDetails.sellerAddress1
-        : invoice.seller_address_1;
-      invoice.seller_address_2 = updateInvoiceDetails.sellerAddress2
-        ? updateInvoiceDetails.sellerAddress2
-        : invoice.seller_address_2;
-      invoice.seller_address_3 = updateInvoiceDetails.sellerAddress3
-        ? updateInvoiceDetails.sellerAddress3
-        : invoice.seller_address_3;
-      invoice.seller_mobile = updateInvoiceDetails.sellerMobile
-        ? updateInvoiceDetails.sellerMobile
-        : invoice.seller_mobile;
-      invoice.seller_gst = updateInvoiceDetails.sellerGst
-        ? updateInvoiceDetails.sellerGst
-        : invoice.seller_gst;
+      invoice.from_name = updateInvoiceDetails.fromName
+        ? updateInvoiceDetails.fromName
+        : invoice.from_name;
+      invoice.invoice_number = invoiceNumber;
+      invoice.from_email = updateInvoiceDetails.fromEmail
+        ? updateInvoiceDetails.fromEmail
+        : invoice.from_email;
+      invoice.issue_date = updateInvoiceDetails.issueDate
+        ? new Date(updateInvoiceDetails.issueDate)
+        : invoice.issue_date;
+      invoice.from_address = updateInvoiceDetails.fromAddress
+        ? updateInvoiceDetails.fromAddress
+        : invoice.from_address;
+      invoice.from_mobile = updateInvoiceDetails.fromMobile
+        ? updateInvoiceDetails.fromMobile
+        : invoice.from_mobile;
+      invoice.from_business_id = updateInvoiceDetails.fromBusinessId
+        ? updateInvoiceDetails.fromBusinessId
+        : invoice.from_business_id;
       invoice.logo = updateInvoiceDetails.logo
         ? updateInvoiceDetails.logo
         : invoice.logo;
-      invoice.client_name = updateInvoiceDetails.clientName
-        ? updateInvoiceDetails.clientName
-        : invoice.client_name;
-      invoice.client_email = updateInvoiceDetails.clientEmail
-        ? updateInvoiceDetails.clientEmail
-        : invoice.client_email;
-      invoice.client_address_1 = updateInvoiceDetails.clientAddress1
-        ? updateInvoiceDetails.clientAddress1
-        : invoice.client_address_1;
-      invoice.client_address_2 = updateInvoiceDetails.clientAddress2
-        ? updateInvoiceDetails.clientAddress2
-        : invoice.client_address_2;
-      invoice.client_address_3 = updateInvoiceDetails.clientAddress3
-        ? updateInvoiceDetails.clientAddress3
-        : invoice.client_address_3;
-      invoice.client_mobile = updateInvoiceDetails.clientMobile
-        ? updateInvoiceDetails.clientMobile
-        : invoice.client_mobile;
+      invoice.to_name = updateInvoiceDetails.toName
+        ? updateInvoiceDetails.toName
+        : invoice.to_name;
+      invoice.to_email = updateInvoiceDetails.toEmail
+        ? updateInvoiceDetails.toEmail
+        : invoice.to_email;
+      invoice.to_address = updateInvoiceDetails.toAddress
+        ? updateInvoiceDetails.toAddress
+        : invoice.to_address;
+      invoice.to_mobile = updateInvoiceDetails.toMobile
+        ? updateInvoiceDetails.toMobile
+        : invoice.to_mobile;
       invoice.order_items = updateInvoiceDetails.orderItem
         ? updateInvoiceDetails.orderItem
         : invoice.order_items;
-      invoice.tax = updateInvoiceDetails.tax
+      invoice.tax_rate = updateInvoiceDetails.tax
         ? updateInvoiceDetails.tax
-        : invoice.tax;
+        : invoice.tax_rate;
       invoice.currency = updateInvoiceDetails.currency
         ? updateInvoiceDetails.currency
         : invoice.currency;
@@ -285,17 +264,17 @@ export class InvoiceService {
     }
   }
 
-  async deleteInvoice(user: getInvoiceParams, deleteInvoiceName: string) {
+  async deleteInvoice(user: getInvoiceParams, deleteInvoiceNumber: string) {
     try {
-      const invoiceName = `${user}_${deleteInvoiceName}`;
+      const invoiceNumber = `${user}_${deleteInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_number: invoiceNumber },
       });
       if (!invoice) {
         throw new BadRequestException('Invoice Not Found');
       }
       const logo = `${logoFolder}/${invoice.logo}`;
-      const pdf = `${pdfFolder}/${invoice.invoice_name}`;
+      const pdf = `${pdfFolder}/${invoice.invoice_number}`;
       if (fs.existsSync(logo)) {
         fs.unlink(logo, (err) => {
           if (err) {
@@ -319,11 +298,11 @@ export class InvoiceService {
     }
   }
 
-  async invoicePaid(user: getInvoiceParams, paidInvoiceName: string) {
+  async invoicePaid(user: getInvoiceParams, paidInvoiceNumber: string) {
     try {
-      const invoiceName = `${user}_${paidInvoiceName}`;
+      const invoiceNumber = `${user}_${paidInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceName },
+        where: { invoice_name: invoiceNumber },
       });
       if (!invoice) {
         throw new BadRequestException('Invoice Not Found');

@@ -17,7 +17,7 @@ export type UserLoginParams = {
 
 export type verifyUserParams = {
   email: string;
-  code: string;
+  otp: string;
 };
 
 export type resendEmailParams = {
@@ -29,35 +29,27 @@ export type getInvoiceParams = {
 };
 
 export type createInvoiceParams = {
-  sellerName: string;
+  logo: string;
 
   invoiceName: string;
 
-  sellerEmail: string;
+  fromName: string;
 
-  sellerAddress1: string;
+  fromEmail: string;
 
-  sellerAddress2: string;
+  fromAddress: string;
 
-  sellerAddress3: string;
+  fromMobile: string;
 
-  sellerMobile: string;
+  fromBusinessId: string;
 
-  sellerGst: string;
+  toName: string;
 
-  logo: string;
+  toEmail: string;
 
-  clientName: string;
+  toAddress: string;
 
-  clientEmail: string;
-
-  clientAddress1: string;
-
-  clientAddress2: string;
-
-  clientAddress3: string;
-
-  clientMobile: string;
+  toMobile: string;
 
   tax: number;
 
@@ -65,41 +57,35 @@ export type createInvoiceParams = {
 
   status: PaymentStatus;
 
-  billingDate: number;
+  invoiceNumber: string;
+
+  issueDate: number;
 
   orderItem: OrderItem[];
 };
 
 export type updateInvoiceParams = {
-  sellerName?: string;
+  logo?: string;
 
   invoiceName?: string;
 
-  sellerEmail?: string;
+  fromName?: string;
 
-  sellerAddress1?: string;
+  fromEmail?: string;
 
-  sellerAddress2?: string;
+  fromAddress?: string;
 
-  sellerAddress3?: string;
+  fromMobile?: string;
 
-  sellerMobile?: string;
+  fromBusinessId?: string;
 
-  sellerGst?: string;
+  toName?: string;
 
-  logo?: string;
+  toEmail?: string;
 
-  clientName?: string;
+  toAddress?: string;
 
-  clientEmail?: string;
-
-  clientAddress1?: string;
-
-  clientAddress2?: string;
-
-  clientAddress3?: string;
-
-  clientMobile?: string;
+  toMobile?: string;
 
   tax?: number;
 
@@ -107,37 +93,36 @@ export type updateInvoiceParams = {
 
   status?: PaymentStatus;
 
-  billingDate?: number;
+  invoiceNumber?: string;
+
+  issueDate?: number;
 
   orderItem?: OrderItem[];
 };
 
 export type typeGetDbSeach = {
-  seller_id: string;
+  from_id: string;
   status?: PaymentStatus;
-  client_name?: FindOperator<string>;
+  to_name?: FindOperator<string>;
 };
 
 export type createPdfParams = {
-  seller_name: string;
-  invoice_name: string;
-  seller_id: string;
-  seller_email: string;
-  billing_date: Date; // Assuming the date will be represented as a string
-  seller_address_1: string;
-  seller_address_2: string;
-  seller_address_3: string;
-  seller_mobile: string;
-  seller_gst: string;
   logo: string;
-  client_name: string;
-  client_email: string;
-  client_address_1: string;
-  client_address_2: string;
-  client_address_3: string;
-  client_mobile: string;
+  invoice_name: string;
+  from_name: string;
+  from_email: string;
+  from_address: string;
+  from_mobile: string;
+  from_business_id: string;
+  to_name: string;
+  to_email: string;
+  to_address: string;
+  to_mobile: string;
+  invoice_number: string;
+  issue_date: Date; // Assuming the date will be represented as a string
   order_items: OrderItem[];
-  tax: number;
+  tax_rate: number;
+  tax_amount: number;
   currency: string;
   status: string;
   sub_total: number;

@@ -143,11 +143,12 @@ export class InvoiceController {
       invoiceDetailsDto,
       user,
     );
-    if (!invoice.success) {
+    if (!invoice.success == false) {
       return invoice;
     }
     const pdfPath = await this.pdfService.generatePdf(invoice);
     if (action == 'email') {
+      console.log('.........................');
       const attachments = [
         {
           filename: uuid(),
@@ -155,7 +156,7 @@ export class InvoiceController {
         },
       ];
       await this.emailService.sendEmail(
-        invoiceDetailsDto.clientEmail,
+        invoiceDetailsDto.toEmail,
         emailInvoiceSubject,
         emailInvoiceText,
         attachments,
@@ -187,7 +188,7 @@ export class InvoiceController {
         },
       ];
       await this.emailService.sendEmail(
-        updateInvoiceDetailsDto.clientEmail,
+        updateInvoiceDetailsDto.toEmail,
         emailInvoiceSubject,
         emailInvoiceText,
         attachments,

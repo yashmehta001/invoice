@@ -61,7 +61,7 @@ export class UserVerificationDto {
   email: string;
 
   @Length(6)
-  code: string;
+  otp: string;
 }
 
 export class ResendEmailDto {
@@ -107,40 +107,32 @@ export enum currency {
 }
 export class CreateInvoiceDto {
   @IsNotEmpty()
-  sellerName: string;
+  fromName: string;
 
   invoiceName: string;
 
   @IsNotEmpty()
   @IsEmail()
-  sellerEmail: string;
+  fromEmail: string;
 
-  sellerAddress1: string;
+  fromAddress: string;
 
-  sellerAddress2: string;
+  fromMobile: string;
 
-  sellerAddress3: string;
-
-  sellerMobile: string;
-
-  sellerGst: string;
+  fromBusinessId: string;
 
   logo: string;
 
   @IsNotEmpty()
-  clientName: string;
+  toName: string;
 
   @IsNotEmpty()
   @IsEmail()
-  clientEmail: string;
+  toEmail: string;
 
-  clientAddress1: string;
+  toAddress: string;
 
-  clientAddress2: string;
-
-  clientAddress3: string;
-
-  clientMobile: string;
+  toMobile: string;
 
   tax: number;
 
@@ -150,7 +142,9 @@ export class CreateInvoiceDto {
   @IsEnum(PaymentStatus)
   status: PaymentStatus;
 
-  billingDate: number;
+  @IsNotEmpty()
+  invoiceNumber: string;
+  issueDate: number | null;
 
   @IsNotEmpty()
   @IsArray()
@@ -161,40 +155,32 @@ export class CreateInvoiceDto {
 
 export class UpdateInvoiceDetailsDto {
   @IsNotEmpty()
-  sellerName?: string;
+  fromName?: string;
 
   invoiceName?: string;
 
   @IsNotEmpty()
   @IsEmail()
-  sellerEmail?: string;
+  fromEmail?: string;
 
-  sellerAddress1?: string;
+  fromAddress?: string;
 
-  sellerAddress2?: string;
+  fromMobile?: string;
 
-  sellerAddress3?: string;
-
-  sellerMobile?: string;
-
-  sellerGst?: string;
+  from_business_id?: string;
 
   logo?: string;
 
   @IsNotEmpty()
-  clientName?: string;
+  toName?: string;
 
   @IsNotEmpty()
   @IsEmail()
-  clientEmail?: string;
+  toEmail?: string;
 
-  clientAddress1?: string;
+  toAddress?: string;
 
-  clientAddress2?: string;
-
-  clientAddress3?: string;
-
-  clientMobile?: string;
+  toMobile?: string;
 
   tax?: number;
 
