@@ -100,9 +100,9 @@ export class InvoiceService {
     }
   }
 
-  async checkInvoice(user: getInvoiceParams, name: string) {
+  async checkInvoice(user: getInvoiceParams, number: string) {
     try {
-      const invoiceNumber = `${user}_${name}`;
+      const invoiceNumber = `${user}_${number}`;
       const invoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
