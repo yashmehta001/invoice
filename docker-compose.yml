@@ -17,7 +17,7 @@ services:
     volumes:
       - .:/app
     depends_on:
-            - db
+      - db
   db:
     image: postgres
     ports:
