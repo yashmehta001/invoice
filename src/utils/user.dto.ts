@@ -37,7 +37,7 @@ export class EmailDto {
   @IsEmail()
   email: string;
 
-  name: string;
+  number: string;
 }
 
 export class UserLoginDto {

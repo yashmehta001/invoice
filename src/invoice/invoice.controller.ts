@@ -99,7 +99,7 @@ export class InvoiceController {
   ) {
     const checkInvoice = await this.invoiceService.checkInvoice(
       user,
-      details.name,
+      details.number,
     );
     if (!checkInvoice) {
       throw new BadRequestException('Invoice Not Found');
@@ -165,16 +165,16 @@ export class InvoiceController {
     return responseMessage.invoiceSaved;
   }
 
-  @Put(':name/:action')
+  @Put(':number/:action')
   @UsePipes(new ValidationPipe())
   async updatePdf(
     @Headers('user') user: getInvoicesDto,
-    @Param('name') name: string,
+    @Param('number') number: string,
     @Param('action') action: Action,
     @Body() updateInvoiceDetailsDto: UpdateInvoiceDetailsDto,
   ) {
     const invoice = await this.invoiceService.updateInvoice(
-      name,
+      number,
       updateInvoiceDetailsDto,
       user,
     );
@@ -197,13 +197,13 @@ export class InvoiceController {
     return responseMessage.invoiceSaved;
   }
 
-  @Delete(':name')
+  @Delete(':number')
   @UsePipes(new ValidationPipe())
   async deleteInvoice(
     @Headers('user') user: getInvoicesDto,
-    @Param('name') name: string,
+    @Param('number') number: string,
   ) {
-    await this.invoiceService.deleteInvoice(user, name);
+    await this.invoiceService.deleteInvoice(user, number);
     return responseMessage.deleteInvoice;
   }
 }
