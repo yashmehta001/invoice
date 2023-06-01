@@ -29,15 +29,4 @@ export class PdfService {
     await browser.close();
     return pdfPath;
   }
-  // if (logo) {
-  //   const logoPath = path.join(logoFolder, '/', logo);
-  //   doc.image(`${logoPath}`, 320, 280, { scale: 0.25 });
-  // }
-
-  // if (!fs.existsSync(filename)) {
-  //   fs.mkdirSync(pdfFolder, { recursive: true });
-  // }
-  // if (!fs.existsSync(pdfFolder)) {
-  //   fs.mkdirSync(pdfFolder, { recursive: true });
-  // }
 }
