@@ -19,7 +19,7 @@ export class EmailService {
           pass: email.password,
         },
       });
-      await transporter.sendMail(
+      transporter.sendMail(
         {
           from: email.email,
           to,
