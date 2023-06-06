@@ -86,7 +86,7 @@ export class InvoiceController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const checkFile = await this.invoiceService.checkFile(file);
-    if (!checkFile.success) {
+    if (checkFile.isError) {
       return checkFile;
     }
     const filename = await this.invoiceService.saveFile(user, file);
@@ -106,7 +106,7 @@ export class InvoiceController {
     if (!checkInvoice) {
       throw new BadRequestException('Invoice Not Found');
     }
-    const pdfPath = path.join(pdfFolder, '/', checkInvoice);
+    const pdfPath = path.join(pdfFolder, checkInvoice);
     if (!fs.existsSync(pdfPath)) {
       return errorMessage.emailPDF;
     }

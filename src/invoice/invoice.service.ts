@@ -274,7 +274,7 @@ export class InvoiceService {
         throw new BadRequestException('Invoice Not Found');
       }
       const logo = `${logoFolder}/${invoice.logo}`;
-      const pdf = `${pdfFolder}/${invoice.invoice_number}`;
+      const pdf = `${pdfFolder}${invoice.invoice_number}`;
       if (fs.existsSync(logo)) {
         fs.unlink(logo, (err) => {
           if (err) {

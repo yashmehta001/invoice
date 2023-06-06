@@ -19,13 +19,13 @@ async function bootstrap() {
   };
   app.enableCors(corsOptions);
 
-  const config = new DocumentBuilder()
+  const options = new DocumentBuilder()
     .setTitle('Invoice App')
     .setDescription('Invoice API description')
     .setVersion('1.0')
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
   await app.listen(port);
