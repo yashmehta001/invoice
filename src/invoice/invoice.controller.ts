@@ -37,7 +37,9 @@ import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
 import { Order } from 'src/utils/types';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('invoice')
 @Controller('invoice')
 export class InvoiceController {
   constructor(
