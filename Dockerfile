@@ -23,9 +23,6 @@ COPY . .
 RUN mkdir -p files/logo
 RUN mkdir -p files/pdf
 
-# Set environment variables
-# ENV NODE_ENV=production
-# ENV PORT=3000
 
 # Expose the port on which the NestJS application will run
 EXPOSE 3000

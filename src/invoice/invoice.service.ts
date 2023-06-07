@@ -61,12 +61,12 @@ export class InvoiceService {
       if (JSON.stringify(order) != JSON.stringify({ null: null })) {
         dbQuery.order = order;
       }
-      const invoices = await this.invoiceRepository.find(dbQuery);
-      if (!invoices.length) {
+      const data = await this.invoiceRepository.find(dbQuery);
+      if (!data.length) {
         return responseMessage.noInvoice;
       }
       let total = 0;
-      invoices.forEach((invoice) => {
+      data.forEach((invoice) => {
         invoice.invoice_number = invoice.invoice_number.split('_')[1];
         if (invoice.status == PaymentStatus.Outstanding) {
           total += +invoice.total;
@@ -74,7 +74,7 @@ export class InvoiceService {
       });
       return {
         ...responseMessage.getInvoice,
-        invoices,
+        data,
         total,
       };
     } catch (e) {
@@ -88,13 +88,11 @@ export class InvoiceService {
       const isInvoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
-      if (!isInvoice) {
-        throw new BadRequestException('Invoice Not Found');
-      }
+      if (!isInvoice) throw new BadRequestException('Invoice Not Found');
       isInvoice.invoice_number = name;
       delete isInvoice.created_at;
       delete isInvoice.updated_at;
-      return { ...responseMessage.getInvoice, invoice: isInvoice };
+      return { ...responseMessage.getInvoice, data: isInvoice };
     } catch (e) {
       return e;
     }
@@ -274,7 +272,7 @@ export class InvoiceService {
         throw new BadRequestException('Invoice Not Found');
       }
       const logo = `${logoFolder}/${invoice.logo}`;
-      const pdf = `${pdfFolder}/${invoice.invoice_number}`;
+      const pdf = `${pdfFolder}${invoice.invoice_number}`;
       if (fs.existsSync(logo)) {
         fs.unlink(logo, (err) => {
           if (err) {

@@ -1,4 +1,4 @@
-version: "3"
+version: '3.8'
 
 services:
   app:
@@ -6,26 +6,18 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
-    # environment:
-    #   - NODE_ENV=production
-    #   - DATABASE_HOST=${DATABASE_HOST}
-    #   - DATABASE_PORT=${DATABASE_PORT}
-    #   - DATABASE_USERNAME=${DATABASE_USER}
-    #   - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-    #   - DATABASE_NAME=${DATABASE_NAME}
+      - '4000:3000'
+    env_file:
+      - .env
     volumes:
       - .:/app
-      - /app/node_modules
     depends_on:
       - db
   db:
-    image: postgres
+    image: postgres:latest
     ports:
-      - "5432:5432"
+      - '7850:5432'
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-    volumes:
-      - .:/app

@@ -89,7 +89,7 @@ export class UsersService {
       }
       const payload = { id: user.id };
       const accessToken = jwt.sign(payload, userConstants.jwtSecret);
-      return { ...responseMessage.userLogin, accessToken };
+      return { ...responseMessage.userLogin, data: { accessToken } };
     } catch (e) {
       return e;
     }
