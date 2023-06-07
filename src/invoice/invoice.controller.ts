@@ -37,9 +37,9 @@ import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
 import { Order } from 'src/utils/types';
-import { ApiTags } from '@nestjs/swagger';
+// import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('invoice')
+// @ApiTags('invoice')
 @Controller('invoice')
 export class InvoiceController {
   constructor(
@@ -47,7 +47,6 @@ export class InvoiceController {
     private pdfService: PdfService,
     private emailService: EmailService,
   ) {}
-
   @Get()
   @UsePipes(new ValidationPipe())
   userInvoice(
@@ -145,9 +144,7 @@ export class InvoiceController {
       invoiceDetailsDto,
       user,
     );
-    if (invoice.success == false) {
-      return invoice;
-    }
+    if (invoice.success == false) return invoice;
     const pdfPath = await this.pdfService.generatePdf(invoice);
     if (action == 'email') {
       const attachments = [
