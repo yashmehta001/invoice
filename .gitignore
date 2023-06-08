@@ -38,4 +38,4 @@ lerna-debug.log*
 # Development File
 package-lock.json
 *.env
-Dockerfile
+/data

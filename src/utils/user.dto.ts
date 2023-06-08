@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsString,
   IsEnum,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -109,18 +110,23 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   fromName: string;
 
+  @IsOptional()
   invoiceName: string;
 
   @IsNotEmpty()
   @IsEmail()
   fromEmail: string;
 
+  @IsOptional()
   fromAddress: string;
 
+  @IsOptional()
   fromMobile: string;
 
+  @IsOptional()
   fromBusinessId: string;
 
+  @IsOptional()
   logo: string;
 
   @IsNotEmpty()
@@ -130,10 +136,13 @@ export class CreateInvoiceDto {
   @IsEmail()
   toEmail: string;
 
+  @IsOptional()
   toAddress: string;
 
+  @IsOptional()
   toMobile: string;
 
+  @IsOptional()
   tax: number;
 
   @IsEnum(currency)
@@ -144,6 +153,8 @@ export class CreateInvoiceDto {
 
   @IsNotEmpty()
   invoiceNumber: string;
+
+  @IsOptional()
   issueDate: number | null;
 
   @IsNotEmpty()
@@ -157,18 +168,23 @@ export class UpdateInvoiceDetailsDto {
   @IsNotEmpty()
   fromName?: string;
 
+  @IsOptional()
   invoiceName?: string;
 
   @IsNotEmpty()
   @IsEmail()
   fromEmail?: string;
 
+  @IsOptional()
   fromAddress?: string;
 
+  @IsOptional()
   fromMobile?: string;
 
+  @IsOptional()
   from_business_id?: string;
 
+  @IsOptional()
   logo?: string;
 
   @IsNotEmpty()
@@ -178,10 +194,13 @@ export class UpdateInvoiceDetailsDto {
   @IsEmail()
   toEmail?: string;
 
+  @IsOptional()
   toAddress?: string;
 
+  @IsOptional()
   toMobile?: string;
 
+  @IsOptional()
   tax?: number;
 
   @IsEnum(currency)
@@ -190,6 +209,7 @@ export class UpdateInvoiceDetailsDto {
   @IsEnum(PaymentStatus)
   status?: PaymentStatus;
 
+  @IsOptional()
   billingDate?: number;
 
   @IsNotEmpty()
