@@ -21,3 +21,8 @@ services:
     environment:
       - POSTGRES_USER=${DATABASE_USER}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    volumes:
+      - ./data:/var/lib/postgresql/data
+
+volumes:
+  data:
