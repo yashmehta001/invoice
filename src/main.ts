@@ -3,21 +3,20 @@ import { AppModule } from './app.module';
 import 'dotenv/config';
 import { port } from './config/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // // Enable CORS
-  const corsOptions: CorsOptions = {
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders:
-      'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, Observe',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-  };
-  app.enableCors(corsOptions);
+  app.enableCors();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   const options = new DocumentBuilder()
     .setTitle('Invoice App')

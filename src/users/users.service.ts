@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+import { compare, hashSync } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 import { Injectable } from '@nestjs/common';
@@ -33,11 +33,9 @@ export class UsersService {
       const email = createUserDetails.email.toLowerCase();
       const user = await this.userRepository.findOne({ where: { email } });
 
-      if (user) {
-        return errorMessage.emailExists;
-      }
+      if (user) return errorMessage.emailExists;
       const now = new Date();
-      const password = await bcrypt.hash(
+      const password = hashSync(
         createUserDetails.password,
         userConstants.saltRounds,
       );
@@ -54,7 +52,6 @@ export class UsersService {
         created_at: now,
         updated_at: now,
       });
-
       await this.userRepository.save(newUser);
       await this.emailService.sendEmail(
         email,
@@ -64,7 +61,7 @@ export class UsersService {
       );
       return responseMessage.userCreation;
     } catch (e) {
-      return e;
+      return { isError: true, message: e.message };
     }
   }
 
@@ -73,16 +70,13 @@ export class UsersService {
       const email = userLoginDetails.email.toLowerCase();
 
       const user = await this.userRepository.findOne({ where: { email } });
-      if (!user) {
-        return errorMessage.login;
-      }
-      const verifyPassword = await bcrypt.compare(
+      if (!user) return errorMessage.login;
+
+      const verifyPassword = await compare(
         userLoginDetails.password,
         user.password,
       );
-      if (!verifyPassword) {
-        return errorMessage.login;
-      }
+      if (!verifyPassword) return errorMessage.login;
       if (!user.is_email_verified) {
         this.resendEmail({ email });
         return errorMessage.emailNotVerified;
@@ -103,17 +97,12 @@ export class UsersService {
       const otpCreatedAt = new Date(user.otp_created_at);
       const id = user.id;
 
-      if (!user) {
-        return errorMessage.emailNotFound;
-      }
+      if (!user) return errorMessage.emailNotFound;
 
-      if (user.is_email_verified) {
-        return errorMessage.isVerified;
-      }
+      if (user.is_email_verified) return errorMessage.isVerified;
 
-      if (+userVerificationDetails.otp != user.otp) {
+      if (+userVerificationDetails.otp != user.otp)
         return errorMessage.isNotVerified;
-      }
 
       if (+now > +otpCreatedAt + userConstants.otpExpiryTime) {
         this.resendEmail({ email });
@@ -138,13 +127,9 @@ export class UsersService {
       const user = await this.userRepository.findOne({ where: { email } });
       const id = user.id;
 
-      if (!user) {
-        return errorMessage.emailNotFound;
-      }
+      if (!user) return errorMessage.emailNotFound;
 
-      if (user.is_email_verified) {
-        return errorMessage.isVerified;
-      }
+      if (user.is_email_verified) return errorMessage.isVerified;
 
       await this.emailService.sendEmail(
         email,
