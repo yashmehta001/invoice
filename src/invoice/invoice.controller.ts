@@ -37,9 +37,9 @@ import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
 import { Order } from 'src/utils/types';
-// import { ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
-// @ApiTags('invoice')
+@ApiTags('invoice')
 @Controller('invoice')
 export class InvoiceController {
   constructor(
@@ -85,9 +85,7 @@ export class InvoiceController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     const checkFile = await this.invoiceService.checkFile(file);
-    if (checkFile.isError) {
-      return checkFile;
-    }
+    if (checkFile.isError) return checkFile;
     const filename = await this.invoiceService.saveFile(user, file);
     return { ...responseMessage.validLogoSaved, filename };
   }
@@ -102,13 +100,9 @@ export class InvoiceController {
       user,
       details.number,
     );
-    if (!checkInvoice) {
-      throw new BadRequestException('Invoice Not Found');
-    }
+    if (!checkInvoice) throw new BadRequestException('Invoice Not Found');
     const pdfPath = path.join(pdfFolder, checkInvoice);
-    if (!fs.existsSync(pdfPath)) {
-      return errorMessage.emailPDF;
-    }
+    if (!fs.existsSync(pdfPath)) return errorMessage.emailPDF;
     const attachments = [
       {
         filename: uuid(),
@@ -146,22 +140,20 @@ export class InvoiceController {
     );
     if (invoice.success == false) return invoice;
     const pdfPath = await this.pdfService.generatePdf(invoice);
-    if (action == 'email') {
-      const attachments = [
-        {
-          filename: uuid(),
-          content: fs.createReadStream(pdfPath),
-        },
-      ];
-      await this.emailService.sendEmail(
-        invoiceDetailsDto.toEmail,
-        emailInvoiceSubject,
-        emailInvoiceText,
-        attachments,
-      );
-      return responseMessage.emailInvoice;
-    }
-    return responseMessage.invoiceSaved;
+    if (action == 'save') return responseMessage.invoiceSaved;
+    const attachments = [
+      {
+        filename: uuid(),
+        content: fs.createReadStream(pdfPath),
+      },
+    ];
+    await this.emailService.sendEmail(
+      invoiceDetailsDto.toEmail,
+      emailInvoiceSubject,
+      emailInvoiceText,
+      attachments,
+    );
+    return responseMessage.emailInvoice;
   }
 
   @Put(':number/:action')
@@ -178,22 +170,22 @@ export class InvoiceController {
       user,
     );
     const pdfPath = await this.pdfService.generatePdf(invoice);
-    if (action == 'email') {
-      const attachments = [
-        {
-          filename: uuid(),
-          content: fs.createReadStream(pdfPath),
-        },
-      ];
-      await this.emailService.sendEmail(
-        updateInvoiceDetailsDto.toEmail,
-        emailInvoiceSubject,
-        emailInvoiceText,
-        attachments,
-      );
-      return responseMessage.emailInvoice;
-    }
-    return responseMessage.invoiceSaved;
+
+    if (action != 'email') return responseMessage.invoiceSaved;
+
+    const attachments = [
+      {
+        filename: uuid(),
+        content: fs.createReadStream(pdfPath),
+      },
+    ];
+    await this.emailService.sendEmail(
+      updateInvoiceDetailsDto.toEmail,
+      emailInvoiceSubject,
+      emailInvoiceText,
+      attachments,
+    );
+    return responseMessage.emailInvoice;
   }
 
   @Delete(':number')
