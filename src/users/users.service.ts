@@ -11,7 +11,6 @@ import {
   verifyUserParams,
 } from 'src/utils/types';
 import { Repository } from 'typeorm';
-import { EmailService } from '../email/email.service';
 
 import {
   errorMessage,
@@ -25,7 +24,6 @@ import { mapper } from 'src/utils/mapper';
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private emailService: EmailService,
   ) {}
 
   async createUser(payload: CreateUserParams) {
@@ -124,7 +122,7 @@ export class UsersService {
         where: { email },
       });
 
-      const verifyPassword = await compareSync(password, user.password);
+      const verifyPassword = compareSync(password, user.password);
       if (!verifyPassword) return errorMessage.login;
       if (!user.is_email_verified) {
         this.resendEmail({ email });

@@ -52,7 +52,7 @@ export class UsersController {
   }
 
   @Post('/login')
-  userLogin(@Body() userLoginDto: UserLoginDto) {
-    return this.userService.loginUser(userLoginDto);
+  userLogin(@Body() payload: UserLoginDto) {
+    return this.userService.loginUser(payload);
   }
 }
