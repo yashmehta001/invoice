@@ -1,15 +1,23 @@
 # Use the official Node.js 14 image as the base image
-FROM node:18.12.1-alpine
+FROM node:18
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Install additional dependencies
-RUN apk add --no-cache chromium
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+  wget \
+  gpg \
+  && rm -rf /var/lib/apt/lists/*
 
+# Install Google Chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+RUN apt-get update && apt-get install -y google-chrome-stable
 
-# Set Chrome path environment variable
-ENV CHROME_BIN=/usr/bin/chromium-browser
+# Set environment variables
+ENV CHROME_BIN=/usr/bin/google-chrome
+
 
 # Copy the package.json and package-lock.json files to the working directory
 COPY package*.json ./

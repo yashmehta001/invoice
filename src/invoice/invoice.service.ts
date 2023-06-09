@@ -43,12 +43,8 @@ export class InvoiceService {
       const search: typeGetDbSeach = {
         from_id: userId,
       };
-      if (params) {
-        search.status = params;
-      }
-      if (invoiceNumber) {
-        search.to_name = Like(`%${invoiceNumber}%`);
-      }
+      if (params) search.status = params;
+      if (invoiceNumber) search.to_name = Like(`%${invoiceNumber}%`);
       const order = {
         [sortBy]: sortOrder,
       };
@@ -58,14 +54,12 @@ export class InvoiceService {
         skip,
         take: limit,
       };
-      if (JSON.stringify(order) != JSON.stringify({ null: null })) {
+      if (JSON.stringify(order) != JSON.stringify({ null: null }))
         dbQuery.order = order;
-      }
       const data = await this.invoiceRepository.find(dbQuery);
-      if (!data.length) {
-        return responseMessage.noInvoice;
-      }
+      if (!data.length) return responseMessage.noInvoice;
       let total = 0;
+
       data.forEach((invoice) => {
         invoice.invoice_number = invoice.invoice_number.split('_')[1];
         if (invoice.status == PaymentStatus.Outstanding) {
@@ -104,9 +98,7 @@ export class InvoiceService {
       const invoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
-      if (!invoice) {
-        return false;
-      }
+      if (!invoice) return false;
       return invoiceNumber;
     } catch (e) {
       return e;
@@ -122,9 +114,8 @@ export class InvoiceService {
       const isInvoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
-      if (isInvoice) {
-        return errorMessage.invoiceExists;
-      }
+      if (isInvoice) return errorMessage.invoiceExists;
+
       const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
       const orderItems = createInvoiceDetails.orderItem;
       const subTotalAmount = mapper.calculateTotalAmount(orderItems);
@@ -163,26 +154,21 @@ export class InvoiceService {
   }
 
   async checkFile(file: Express.Multer.File) {
-    if (!file) {
-      return errorMessage.invalidLogoFileNull;
-    }
+    if (!file) return errorMessage.invalidLogoFileNull;
 
-    if (file.size > 2000000) {
-      return errorMessage.invalidLogoFileSize;
-    }
+    if (file.size > 2000000) return errorMessage.invalidLogoFileSize;
     const fileType = file.originalname.split('.').pop();
-    if (fileType !== 'jpg' && fileType !== 'png') {
+    if (fileType !== 'jpg' && fileType !== 'png')
       return errorMessage.invalidLogoFileType;
-    }
+
     return responseMessage.validLogoFile;
   }
 
   async saveFile(user: getInvoiceParams, file: Express.Multer.File) {
     const filename = `${user}_${uuidv4()}${path.extname(file.originalname)}`;
     const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
-    if (!fs.existsSync(logoFolder)) {
+    if (!fs.existsSync(logoFolder))
       fs.mkdirSync(logoFolder, { recursive: true });
-    }
     fs.writeFileSync(`files/logos/${filename}`, file.buffer);
     return filename;
   }
@@ -197,9 +183,7 @@ export class InvoiceService {
       const invoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
-      if (!invoice) {
-        throw new BadRequestException('Invoice Not Found');
-      }
+      if (!invoice) throw new BadRequestException('Invoice Not Found');
       if (updateInvoiceDetails.orderItem.length) {
         invoice.sub_total = mapper.calculateTotalAmount(
           updateInvoiceDetails.orderItem,
@@ -268,27 +252,19 @@ export class InvoiceService {
       const invoice = await this.invoiceRepository.findOne({
         where: { invoice_number: invoiceNumber },
       });
-      if (!invoice) {
-        throw new BadRequestException('Invoice Not Found');
-      }
+      if (!invoice) throw new BadRequestException('Invoice Not Found');
       const logo = `${logoFolder}/${invoice.logo}`;
       const pdf = `${pdfFolder}${invoice.invoice_number}`;
-      if (fs.existsSync(logo)) {
+      if (fs.existsSync(logo))
         fs.unlink(logo, (err) => {
-          if (err) {
-            console.log(err);
-          }
+          if (err) console.log(err);
           return;
         });
-      }
-      if (fs.existsSync(pdf)) {
+      if (fs.existsSync(pdf))
         fs.unlink(pdf, (err) => {
-          if (err) {
-            console.log(err);
-          }
+          if (err) console.log(err);
           return;
         });
-      }
       await this.invoiceRepository.remove(invoice);
       return;
     } catch (e) {
@@ -302,9 +278,7 @@ export class InvoiceService {
       const invoice = await this.invoiceRepository.findOne({
         where: { invoice_name: invoiceNumber },
       });
-      if (!invoice) {
-        throw new BadRequestException('Invoice Not Found');
-      }
+      if (!invoice) throw new BadRequestException('Invoice Not Found');
       invoice.status = PaymentStatus.Paid;
 
       await this.invoiceRepository.save(invoice);
