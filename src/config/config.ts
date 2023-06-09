@@ -17,7 +17,7 @@ export const userConstants = {
   jwtSecret: process.env.JWTSECRET,
 };
 
-export const email = {
+export const mailConfig = {
   email: process.env.USER_EMAIL,
   password: process.env.EMAIL_PASSWORD,
   emailService: process.env.EMAIL_SERVICE,

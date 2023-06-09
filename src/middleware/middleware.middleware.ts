@@ -11,20 +11,20 @@ export class MiddlewareMiddleware implements NestMiddleware {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
-  use(req: any, res: any, next: () => void) {
-    const token: string = req.headers['accesstoken'] as string;
-    jwt.verify(token, userConstants.jwtSecret, async (err, data: any) => {
-      try {
-        if (!token || err) return errorMessage.invalidJwt;
-        const user = await this.userRepository.findOne({
-          where: { id: data.id },
-        });
-        if (!user) res.send(errorMessage.invalidJwt);
-        req.headers.user = user.id;
-        next();
-      } catch (e) {
-        return e;
-      }
-    });
+  async use(req: any, res: any, next: () => void) {
+    try {
+      const { accesstoken } = req.headers;
+      if (!accesstoken) throw new Error();
+
+      const data: any = jwt.verify(accesstoken, userConstants.jwtSecret);
+      const user = await this.userRepository.findOneOrFail({
+        where: { id: data.id },
+      });
+      req.headers.user = user.id;
+      next();
+    } catch (e) {
+      console.error('Middleware error:', e);
+      return res.send(errorMessage.invalidJwt);
+    }
   }
 }
