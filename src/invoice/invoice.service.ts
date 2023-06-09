@@ -10,6 +10,7 @@ import {
 } from 'src/utils/constants';
 import {
   Order,
+  PaymentStatus,
   Query,
   createInvoiceParams,
   getInvoiceParams,
@@ -18,7 +19,6 @@ import {
 } from 'src/utils/types';
 import { Like, Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
-import { PaymentStatus } from 'src/utils/user.dto';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';

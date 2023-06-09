@@ -16,13 +16,9 @@ import {
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import {
-  PaymentStatus,
   CreateInvoiceDto,
-  getInvoicesDto,
   UpdateInvoiceDetailsDto,
-  Action,
-  EmailDto,
-} from 'src/utils/user.dto';
+} from 'src/utils/dto/invoice.dto';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PdfService } from 'src/pdf/pdf.service';
@@ -36,8 +32,9 @@ import {
 import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
-import { Order } from 'src/utils/types';
+import { Action, Order, PaymentStatus } from 'src/utils/types';
 import { ApiTags } from '@nestjs/swagger';
+import { getInvoicesDto, EmailDto } from 'src/utils/dto/user.dto';
 
 @ApiTags('invoice')
 @Controller('invoice')
@@ -133,9 +130,15 @@ export class InvoiceController {
     @Headers('user') user: getInvoicesDto,
     @Body() invoiceDetailsDto: CreateInvoiceDto,
     @Param('action') action: Action,
+    @UploadedFile() file: Express.Multer.File,
   ) {
+    const invoiceDetails = invoiceDetailsDto;
+    const checkFile = await this.invoiceService.checkFile(file);
+    if (checkFile.isError) return checkFile;
+    const filename = await this.invoiceService.saveFile(user, file);
+
     const invoice = await this.invoiceService.createInvoice(
-      invoiceDetailsDto,
+      invoiceDetails,
       user,
     );
     if (invoice.success == false) return invoice;

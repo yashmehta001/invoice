@@ -1,7 +1,24 @@
 import * as fs from 'fs';
-import { OrderItem, PaymentStatus, currency } from './user.dto';
 import { FindManyOptions, FindOperator } from 'typeorm';
 import { Invoice } from 'src/entities/invoice';
+import { OrderItem } from './dto/invoice.dto';
+
+export enum PaymentStatus {
+  Outstanding = 'outstanding',
+  Paid = 'paid',
+}
+
+export enum Action {
+  Save = 'save',
+  Email = 'email',
+}
+
+export enum currency {
+  IND = 'INR',
+  USD = 'USD',
+  EUR = 'EUR',
+  GBP = 'GBP',
+}
 
 export type CreateUserParams = {
   firstName: string;
