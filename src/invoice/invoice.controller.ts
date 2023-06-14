@@ -18,6 +18,7 @@ import { InvoiceService } from './invoice.service';
 import {
   CreateInvoiceDto,
   UpdateInvoiceDetailsDto,
+  getInvoices,
 } from 'src/utils/dto/invoice.dto';
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -32,7 +33,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
-import { Action, Order, PaymentStatus } from 'src/utils/types';
+import { Action } from 'src/utils/types';
 import { ApiTags } from '@nestjs/swagger';
 import { getInvoicesDto, EmailDto } from 'src/utils/dto/user.dto';
 
@@ -48,24 +49,12 @@ export class InvoiceController {
   @UsePipes(new ValidationPipe())
   userInvoice(
     @Headers('user') user: getInvoicesDto,
-    @Query('page') page: number,
-    @Query('sortBy') sortBy: string,
-    @Query('sortOrder') sortOrder: Order,
-    @Query('status') status: PaymentStatus,
-    @Query('search') search: string,
+    @Query() payload: getInvoices,
   ) {
-    return this.invoiceService.getInvoice(
-      user,
-      page,
-      sortBy,
-      sortOrder,
-      status,
-      search,
-    );
+    return this.invoiceService.getInvoice(user, payload);
   }
 
   @Post('paid')
-  @UsePipes(new ValidationPipe())
   async invoicePaind(
     @Headers('user') user: getInvoicesDto,
     @Body('name') name: string,
@@ -75,7 +64,6 @@ export class InvoiceController {
   }
 
   @Post('logo')
-  @UsePipes(new ValidationPipe())
   @UseInterceptors(FileInterceptor('logo'))
   async handleUpload(
     @Headers('user') user: getInvoicesDto,
@@ -88,7 +76,6 @@ export class InvoiceController {
   }
 
   @Post('user/email')
-  @UsePipes(new ValidationPipe())
   async emailInvoice(
     @Headers('user') user: getInvoicesDto,
     @Body() details: EmailDto,
@@ -116,7 +103,6 @@ export class InvoiceController {
   }
 
   @Get(':name')
-  @UsePipes(new ValidationPipe())
   async getInvoice(
     @Headers('user') user: getInvoicesDto,
     @Param('name') name: string,
@@ -125,18 +111,19 @@ export class InvoiceController {
   }
 
   @Post(':action')
-  @UsePipes(new ValidationPipe())
+  @UseInterceptors(FileInterceptor('logo'))
   async createInvoice(
+    @UploadedFile() file,
     @Headers('user') user: getInvoicesDto,
-    @Body() invoiceDetailsDto: CreateInvoiceDto,
+    @Body() body: CreateInvoiceDto,
     @Param('action') action: Action,
-    @UploadedFile() file: Express.Multer.File,
   ) {
-    const invoiceDetails = invoiceDetailsDto;
+    const invoiceDetails = body;
     const checkFile = await this.invoiceService.checkFile(file);
     if (checkFile.isError) return checkFile;
     const filename = await this.invoiceService.saveFile(user, file);
-
+    console.log(filename);
+    return true;
     const invoice = await this.invoiceService.createInvoice(
       invoiceDetails,
       user,
@@ -150,17 +137,16 @@ export class InvoiceController {
         content: fs.createReadStream(pdfPath),
       },
     ];
-    await this.emailService.sendEmail(
-      invoiceDetailsDto.toEmail,
-      emailInvoiceSubject,
-      emailInvoiceText,
-      attachments,
-    );
+    // await this.emailService.sendEmail(
+    //   invoiceDetailsDto.toEmail,
+    //   emailInvoiceSubject,
+    //   emailInvoiceText,
+    //   attachments,
+    // );
     return responseMessage.emailInvoice;
   }
 
   @Put(':number/:action')
-  @UsePipes(new ValidationPipe())
   async updatePdf(
     @Headers('user') user: getInvoicesDto,
     @Param('number') number: string,
@@ -192,7 +178,6 @@ export class InvoiceController {
   }
 
   @Delete(':number')
-  @UsePipes(new ValidationPipe())
   async deleteInvoice(
     @Headers('user') user: getInvoicesDto,
     @Param('number') number: string,

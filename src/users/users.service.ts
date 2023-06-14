@@ -7,6 +7,7 @@ import { User } from 'src/entities/users';
 import {
   CreateUserParams,
   UserLoginParams,
+  getInvoiceParams,
   resendEmailParams,
   verifyUserParams,
 } from 'src/utils/types';
@@ -84,6 +85,20 @@ export class UsersService {
       };
     } catch (e) {
       return errorMessage.emailNotFound;
+    }
+  }
+
+  async getUserProfile(payload: getInvoiceParams) {
+    try {
+      const id = payload.toString();
+      console.log(payload);
+      const user = await this.userRepository.findOneOrFail({
+        select: ['first_name', 'last_name', 'email'],
+        where: { id },
+      });
+      return user;
+    } catch (e) {
+      return errorMessage.UserNotFound;
     }
   }
 

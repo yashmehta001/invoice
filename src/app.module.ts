@@ -8,8 +8,6 @@ import { Invoice } from './entities/invoice';
 import { InvoiceModule } from './invoice/invoice.module';
 import { PdfModule } from './pdf/pdf.module';
 
-console.log('database', database);
-
 @Module({
   imports: [
     TypeOrmModule.forRoot({

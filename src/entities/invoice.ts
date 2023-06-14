@@ -1,4 +1,4 @@
-import { currency, PaymentStatus } from 'src/utils/types';
+import { Currency, PaymentStatus } from 'src/utils/types';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
@@ -85,7 +85,7 @@ export class Invoice {
   @Column({
     default: 'INR',
   })
-  currency: currency;
+  currency: Currency;
 
   @Column({
     default: 'outstanding',

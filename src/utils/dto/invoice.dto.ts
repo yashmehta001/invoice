@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
@@ -9,8 +9,32 @@ import {
   IsArray,
   ValidateNested,
 } from 'class-validator';
-import { currency, PaymentStatus } from '../types';
+import { Currency, PaymentStatus } from '../types';
 import { PartialType } from '@nestjs/swagger';
+
+export class getInvoices {
+  @IsOptional()
+  @Transform((value) => value || 1)
+  page: number;
+
+  @IsOptional()
+  sortBy: string;
+
+  @IsOptional()
+  sortOrder: string;
+
+  @IsOptional()
+  params: PaymentStatus;
+
+  @IsOptional()
+  status: string;
+
+  @IsOptional()
+  invoiceNumber: string;
+
+  @IsOptional()
+  search: string;
+}
 
 export class OrderItem {
   @IsNotEmpty()
@@ -65,8 +89,8 @@ export class CreateInvoiceDto {
   @IsOptional()
   tax: number;
 
-  @IsEnum(currency)
-  currency: currency;
+  @IsEnum(Currency)
+  currency: Currency;
 
   @IsEnum(PaymentStatus)
   status: PaymentStatus;

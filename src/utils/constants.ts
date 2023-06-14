@@ -38,6 +38,7 @@ export const errorMessage = {
     isError: true,
     message: 'File not found',
   },
+  UserNotFound: { isError: true, message: 'User Not Found' },
 };
 
 //Success Responses

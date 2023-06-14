@@ -13,11 +13,18 @@ export enum Action {
   Email = 'email',
 }
 
-export enum currency {
+export enum Currency {
   IND = 'INR',
   USD = 'USD',
   EUR = 'EUR',
   GBP = 'GBP',
+}
+
+export enum sortBy {
+  invoiceName = 'invoice_name',
+  toName = 'to_name',
+  invoiceNumber = 'invoice_number',
+  status = 'status',
 }
 
 export type CreateUserParams = {
@@ -70,7 +77,7 @@ export type createInvoiceParams = {
 
   tax: number;
 
-  currency: currency;
+  currency: Currency;
 
   status: PaymentStatus;
 
@@ -106,7 +113,7 @@ export type updateInvoiceParams = {
 
   tax?: number;
 
-  currency?: currency;
+  currency?: Currency;
 
   status?: PaymentStatus;
 

@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { MiddlewareMiddleware } from 'src/middleware/middleware.middleware';
+import { AuthMiddleware } from 'src/middleware/middleware.middleware';
 import { InvoiceController } from './invoice.controller';
 import { InvoiceService } from './invoice.service';
 import { EmailService } from 'src/email/email.service';
@@ -15,6 +15,6 @@ import { PdfService } from 'src/pdf/pdf.service';
 })
 export class InvoiceModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(MiddlewareMiddleware).forRoutes(InvoiceController);
+    consumer.apply(AuthMiddleware).forRoutes(InvoiceController);
   }
 }

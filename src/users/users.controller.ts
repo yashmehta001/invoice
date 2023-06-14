@@ -1,10 +1,11 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Headers, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
   CreateUserDto,
   ResendEmailDto,
   UserLoginDto,
   UserVerificationDto,
+  getInvoicesDto,
 } from 'src/utils/dto/user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { createUserSubject, responseMessage } from 'src/utils/constants';
@@ -44,6 +45,12 @@ export class UsersController {
       null,
     );
     return responseMessage.resendEmail;
+  }
+
+  @Get('profile')
+  async getProfile(@Headers('user') user: getInvoicesDto) {
+    console.log(user);
+    return await this.userService.getUserProfile(user);
   }
 
   @Post('/verify')

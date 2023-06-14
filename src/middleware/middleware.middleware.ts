@@ -7,7 +7,7 @@ import { errorMessage } from 'src/utils/constants';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class MiddlewareMiddleware implements NestMiddleware {
+export class AuthMiddleware implements NestMiddleware {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
