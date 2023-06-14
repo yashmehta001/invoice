@@ -1,4 +1,4 @@
-import { compare, hashSync } from 'bcrypt';
+import { compareSync, hashSync } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 
 import { Injectable } from '@nestjs/common';
@@ -7,145 +7,147 @@ import { User } from 'src/entities/users';
 import {
   CreateUserParams,
   UserLoginParams,
+  getInvoiceParams,
   resendEmailParams,
   verifyUserParams,
 } from 'src/utils/types';
 import { Repository } from 'typeorm';
-import { EmailService } from '../email/email.service';
 
 import {
   errorMessage,
   responseMessage,
-  createUserSubject,
   createUserText,
 } from 'src/utils/constants';
 import { userConstants } from 'src/config/config';
+import { mapper } from 'src/utils/mapper';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private emailService: EmailService,
   ) {}
 
-  async createUser(createUserDetails: CreateUserParams) {
+  async createUser(payload: CreateUserParams) {
+    const { email, firstName, lastName, password } = payload;
+    const emailLower = email.toLowerCase();
     try {
-      const email = createUserDetails.email.toLowerCase();
-      const user = await this.userRepository.findOne({ where: { email } });
-
-      if (user) return errorMessage.emailExists;
-      const now = new Date();
-      const password = hashSync(
-        createUserDetails.password,
-        userConstants.saltRounds,
-      );
-      const otp = Math.floor(Math.random() * 900000) + 100000;
-
-      const newUser = this.userRepository.create({
-        first_name: createUserDetails.firstName,
-        last_name: createUserDetails.lastName,
-        email: email,
-        password: password,
-        is_email_verified: false,
-        otp: otp,
-        otp_created_at: now,
-        created_at: now,
-        updated_at: now,
+      await this.userRepository.findOneOrFail({
+        where: { email: emailLower },
       });
-      await this.userRepository.save(newUser);
-      await this.emailService.sendEmail(
-        email,
-        createUserSubject,
-        createUserText + otp,
-        null,
-      );
-      return responseMessage.userCreation;
+      return errorMessage.emailExists;
     } catch (e) {
-      return { isError: true, message: e.message };
+      const otp = mapper.generateOTP();
+      const currentDate = new Date();
+
+      try {
+        const hashedPassword = hashSync(password, userConstants.saltRounds);
+
+        const newUser = this.userRepository.create({
+          first_name: firstName,
+          last_name: lastName,
+          email: emailLower,
+          password: hashedPassword,
+          is_email_verified: false,
+          otp: otp,
+          otp_created_at: currentDate,
+          created_at: currentDate,
+          updated_at: currentDate,
+        });
+
+        await this.userRepository.save(newUser);
+        const text = `${createUserText} ${otp}`;
+        return {
+          isError: false,
+          message: text,
+        };
+      } catch (e) {
+        return errorMessage.dbError;
+      }
     }
   }
 
-  async loginUser(userLoginDetails: UserLoginParams) {
+  async resendEmail(payload: resendEmailParams) {
     try {
-      const email = userLoginDetails.email.toLowerCase();
-
-      const user = await this.userRepository.findOne({ where: { email } });
-      if (!user) return errorMessage.login;
-
-      const verifyPassword = await compare(
-        userLoginDetails.password,
-        user.password,
+      const email = payload.email;
+      const otp = mapper.generateOTP();
+      const user = await this.userRepository.findOneOrFail({
+        where: { email },
+      });
+      if (user.is_email_verified) return errorMessage.isVerified;
+      await this.userRepository.update(
+        { id: user.id },
+        { otp: otp, otp_created_at: new Date() },
       );
+      const text = `${createUserText} ${otp}`;
+      return {
+        isError: false,
+        message: text,
+      };
+    } catch (e) {
+      return errorMessage.emailNotFound;
+    }
+  }
+
+  async getUserProfile(payload: getInvoiceParams) {
+    try {
+      const id = payload.toString();
+      console.log(payload);
+      const user = await this.userRepository.findOneOrFail({
+        select: ['first_name', 'last_name', 'email'],
+        where: { id },
+      });
+      return user;
+    } catch (e) {
+      return errorMessage.UserNotFound;
+    }
+  }
+
+  async verifyUser(payload: verifyUserParams) {
+    try {
+      const { email, otp } = payload;
+      const now = new Date().getTime();
+      try {
+        const user = await this.userRepository.findOneOrFail({
+          where: { email },
+        });
+        const otpCreatedAt = new Date(user.otp_created_at);
+        if (user.is_email_verified) return errorMessage.isVerified;
+        if (now > otpCreatedAt.getTime() + userConstants.otpExpiryTime) {
+          this.resendEmail({ email });
+          return errorMessage.otpExpired;
+        }
+        if (+otp != user.otp) return errorMessage.isNotVerified;
+        await this.userRepository.update(
+          { id: user.id },
+          { is_email_verified: true, otp: null, otp_created_at: null },
+        );
+        return responseMessage.userVerification;
+      } catch (e) {
+        return errorMessage.emailNotFound;
+      }
+    } catch (e) {
+      return e;
+    }
+  }
+
+  async loginUser(payload: UserLoginParams) {
+    const { email, password } = payload;
+    try {
+      const user = await this.userRepository.findOneOrFail({
+        where: { email },
+      });
+
+      const verifyPassword = compareSync(password, user.password);
       if (!verifyPassword) return errorMessage.login;
       if (!user.is_email_verified) {
         this.resendEmail({ email });
         return errorMessage.emailNotVerified;
       }
-      const payload = { id: user.id };
-      const accessToken = jwt.sign(payload, userConstants.jwtSecret);
+      const userId = { id: user.id };
+      const accessToken = jwt.sign(userId, userConstants.jwtSecret);
       return { ...responseMessage.userLogin, data: { accessToken } };
     } catch (e) {
-      return e;
-    }
-  }
-
-  async verifyUser(userVerificationDetails: verifyUserParams) {
-    try {
-      const email = userVerificationDetails.email.toLowerCase();
-      const now = new Date().getTime();
-      const user = await this.userRepository.findOne({ where: { email } });
-      const otpCreatedAt = new Date(user.otp_created_at);
-      const id = user.id;
-
-      if (!user) return errorMessage.emailNotFound;
-
-      if (user.is_email_verified) return errorMessage.isVerified;
-
-      if (+userVerificationDetails.otp != user.otp)
-        return errorMessage.isNotVerified;
-
-      if (+now > +otpCreatedAt + userConstants.otpExpiryTime) {
-        this.resendEmail({ email });
-        return errorMessage.otpExpired;
-      }
-
-      user.is_email_verified = true;
-      user.otp = null;
-      user.otp_created_at = null;
-
-      await this.userRepository.update({ id }, { ...user });
-      return responseMessage.userVerification;
-    } catch (e) {
-      return e;
-    }
-  }
-
-  async resendEmail(resendEmailDetails: resendEmailParams) {
-    try {
-      const email = resendEmailDetails.email.toLowerCase();
-      const otp = Math.floor(Math.random() * 900000) + 100000;
-      const user = await this.userRepository.findOne({ where: { email } });
-      const id = user.id;
-
-      if (!user) return errorMessage.emailNotFound;
-
-      if (user.is_email_verified) return errorMessage.isVerified;
-
-      await this.emailService.sendEmail(
-        email,
-        createUserSubject,
-        createUserText + otp,
-        null,
-      );
-
-      user.otp = null;
-      user.otp_created_at = new Date();
-      user.otp = otp;
-
-      await this.userRepository.update({ id }, { ...user });
-      return responseMessage.resendEmail;
-    } catch (e) {
-      return e;
+      return errorMessage.login;
     }
   }
 }

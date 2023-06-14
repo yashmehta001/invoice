@@ -9,6 +9,10 @@ export const emailInvoiceText = 'PFA Invoice';
 
 //Error Responses
 export const errorMessage = {
+  dbError: {
+    isError: true,
+    message: 'An Error occured while storing in Database',
+  },
   emailExists: { isError: true, message: 'Email already Exists' },
   login: { isError: true, message: 'Incorrect Email or Password' },
   emailNotFound: { isError: true, message: 'Email Not Found' },
@@ -34,6 +38,7 @@ export const errorMessage = {
     isError: true,
     message: 'File not found',
   },
+  UserNotFound: { isError: true, message: 'User Not Found' },
 };
 
 //Success Responses
@@ -41,7 +46,7 @@ export const responseMessage = {
   userCreation: { isError: false, message: 'User Creation Successful' },
   userLogin: { isError: false, message: 'User Login Successful' },
   userVerification: { isError: false, message: 'User Verification Successful' },
-  resendEmail: { isError: false, message: 'Email Sent Successfully' },
+  resendEmail: { isError: false, message: 'OTP Sent Successfully' },
   noInvoice: { isError: false, message: 'No invoices stored yet!' },
   emailInvoice: { isError: false, message: 'Invoice Emailed to Client!' },
   invoiceSaved: { isError: false, message: 'Invoice saved as PDF' },

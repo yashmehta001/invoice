@@ -9,7 +9,7 @@ import {
   responseMessage,
 } from 'src/utils/constants';
 import {
-  Order,
+  PaymentStatus,
   Query,
   createInvoiceParams,
   getInvoiceParams,
@@ -18,10 +18,10 @@ import {
 } from 'src/utils/types';
 import { Like, Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
-import { PaymentStatus } from 'src/utils/user.dto';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
+import { getInvoices } from 'src/utils/dto/invoice.dto';
 
 @Injectable()
 export class InvoiceService {
@@ -29,15 +29,9 @@ export class InvoiceService {
     @InjectRepository(Invoice) private invoiceRepository: Repository<Invoice>,
   ) {}
 
-  async getInvoice(
-    user: getInvoiceParams,
-    page = 1,
-    sortBy: string | null = null,
-    sortOrder: Order | null = null,
-    params: PaymentStatus | null = null,
-    invoiceNumber: string | null = null,
-  ) {
+  async getInvoice(user: getInvoiceParams, payload: getInvoices) {
     try {
+      const { page, sortBy, sortOrder, params, invoiceNumber } = payload;
       const skip = (page - 1) * limit;
       const userId = String(user);
       const search: typeGetDbSeach = {

@@ -1,7 +1,31 @@
 import * as fs from 'fs';
-import { OrderItem, PaymentStatus, currency } from './user.dto';
 import { FindManyOptions, FindOperator } from 'typeorm';
 import { Invoice } from 'src/entities/invoice';
+import { OrderItem } from './dto/invoice.dto';
+
+export enum PaymentStatus {
+  Outstanding = 'outstanding',
+  Paid = 'paid',
+}
+
+export enum Action {
+  Save = 'save',
+  Email = 'email',
+}
+
+export enum Currency {
+  IND = 'INR',
+  USD = 'USD',
+  EUR = 'EUR',
+  GBP = 'GBP',
+}
+
+export enum sortBy {
+  invoiceName = 'invoice_name',
+  toName = 'to_name',
+  invoiceNumber = 'invoice_number',
+  status = 'status',
+}
 
 export type CreateUserParams = {
   firstName: string;
@@ -53,7 +77,7 @@ export type createInvoiceParams = {
 
   tax: number;
 
-  currency: currency;
+  currency: Currency;
 
   status: PaymentStatus;
 
@@ -89,7 +113,7 @@ export type updateInvoiceParams = {
 
   tax?: number;
 
-  currency?: currency;
+  currency?: Currency;
 
   status?: PaymentStatus;
 
