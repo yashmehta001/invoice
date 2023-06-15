@@ -85,7 +85,7 @@ export type createInvoiceParams = {
 
   issueDate: number;
 
-  orderItem: OrderItem[];
+  orderItem: [];
 };
 
 export type updateInvoiceParams = {
@@ -119,9 +119,9 @@ export type updateInvoiceParams = {
 
   invoiceNumber?: string;
 
-  issueDate?: number;
+  issueDate?: number | Date;
 
-  orderItem?: OrderItem[];
+  orderItem?: [];
 };
 
 export type typeGetDbSeach = {

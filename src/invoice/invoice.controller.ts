@@ -17,6 +17,7 @@ import {
 import { InvoiceService } from './invoice.service';
 import {
   CreateInvoiceDto,
+  OrderItem,
   UpdateInvoiceDetailsDto,
   getInvoices,
 } from 'src/utils/dto/invoice.dto';
@@ -33,7 +34,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { EmailService } from 'src/email/email.service';
 import * as path from 'path';
-import { Action } from 'src/utils/types';
+import { Action, createInvoiceParams } from 'src/utils/types';
 import { ApiTags } from '@nestjs/swagger';
 import { getInvoicesDto, EmailDto } from 'src/utils/dto/user.dto';
 
@@ -118,17 +119,58 @@ export class InvoiceController {
     @Body() body: CreateInvoiceDto,
     @Param('action') action: Action,
   ) {
-    const invoiceDetails = body;
     const checkFile = await this.invoiceService.checkFile(file);
     if (checkFile.isError) return checkFile;
     const filename = await this.invoiceService.saveFile(user, file);
-    console.log(filename);
-    return true;
+    body.logo = filename;
+    body.orderItem = JSON.parse(body.orderItem);
+    body.issueDate = new Date(+body.issueDate);
+    const invoiceDetails = body as unknown as createInvoiceParams;
     const invoice = await this.invoiceService.createInvoice(
       invoiceDetails,
       user,
     );
-    if (invoice.success == false) return invoice;
+    if (invoice.isError) return invoice;
+    const pdfPath = await this.pdfService.generatePdf(invoice);
+    if (action === 'save') return responseMessage.invoiceSaved;
+    const attachments = [
+      {
+        filename: uuid(),
+        content: fs.createReadStream(pdfPath),
+      },
+    ];
+    await this.emailService.sendEmail(
+      invoiceDetails.toEmail,
+      emailInvoiceSubject,
+      emailInvoiceText,
+      attachments,
+    );
+    return responseMessage.emailInvoice;
+  }
+
+  @Put(':number/:action')
+  @UseInterceptors(FileInterceptor('logo'))
+  async updatePdf(
+    @UploadedFile() file,
+    @Headers('user') user: getInvoicesDto,
+    @Body() body: UpdateInvoiceDetailsDto,
+    @Param('action') action: Action,
+    @Param('number') number: string,
+  ) {
+    if (file) {
+      const checkFile = await this.invoiceService.checkFile(file);
+      if (checkFile.isError) return checkFile;
+      const filename = await this.invoiceService.saveFile(user, file);
+      body.logo = filename;
+    }
+    body.orderItem = JSON.parse(body.orderItem);
+    body.issueDate = new Date(+body.issueDate);
+    const updateInvoiceDetails = body as unknown;
+    const invoice = await this.invoiceService.updateInvoice(
+      number,
+      updateInvoiceDetails,
+      user,
+    );
     const pdfPath = await this.pdfService.generatePdf(invoice);
     if (action == 'save') return responseMessage.invoiceSaved;
     const attachments = [
@@ -137,39 +179,8 @@ export class InvoiceController {
         content: fs.createReadStream(pdfPath),
       },
     ];
-    // await this.emailService.sendEmail(
-    //   invoiceDetailsDto.toEmail,
-    //   emailInvoiceSubject,
-    //   emailInvoiceText,
-    //   attachments,
-    // );
-    return responseMessage.emailInvoice;
-  }
-
-  @Put(':number/:action')
-  async updatePdf(
-    @Headers('user') user: getInvoicesDto,
-    @Param('number') number: string,
-    @Param('action') action: Action,
-    @Body() updateInvoiceDetailsDto: UpdateInvoiceDetailsDto,
-  ) {
-    const invoice = await this.invoiceService.updateInvoice(
-      number,
-      updateInvoiceDetailsDto,
-      user,
-    );
-    const pdfPath = await this.pdfService.generatePdf(invoice);
-
-    if (action != 'email') return responseMessage.invoiceSaved;
-
-    const attachments = [
-      {
-        filename: uuid(),
-        content: fs.createReadStream(pdfPath),
-      },
-    ];
     await this.emailService.sendEmail(
-      updateInvoiceDetailsDto.toEmail,
+      body.toEmail,
       emailInvoiceSubject,
       emailInvoiceText,
       attachments,

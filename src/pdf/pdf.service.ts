@@ -9,8 +9,9 @@ import { createPdfParams } from 'src/utils/types';
 @Injectable()
 export class PdfService {
   async generatePdf(invoice: createPdfParams) {
-    const pdfName = invoice.invoice_number;
-    const pdfPath: string = path.join(pdfFolder, pdfName);
+    const pdfName = invoice.invoice_number + '.pdf';
+    const pdfPath = path.join(pdfFolder, pdfName);
+
     invoice.invoice_number = invoice.invoice_number.split('_')[1];
     invoice.logo = logoFolder + invoice.logo;
     const templatePath = 'src/pdf/pdf.ejs';

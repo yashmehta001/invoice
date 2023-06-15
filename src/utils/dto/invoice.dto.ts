@@ -99,13 +99,16 @@ export class CreateInvoiceDto {
   invoiceNumber: string;
 
   @IsOptional()
-  issueDate: number | null;
+  issueDate: number | Date | null;
+
+  // @IsNotEmpty()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => OrderItem)
+  // orderItem: OrderItem[];
 
   @IsNotEmpty()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItem)
-  orderItem: OrderItem[];
+  orderItem: string;
 }
 
 export class UpdateInvoiceDetailsDto extends PartialType(CreateInvoiceDto) {}
