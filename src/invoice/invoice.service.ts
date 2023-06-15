@@ -109,15 +109,13 @@ export class InvoiceService {
         where: { invoice_number: invoiceNumber },
       });
       if (isInvoice) return errorMessage.invoiceExists;
-
-      const tax = createInvoiceDetails.tax ? createInvoiceDetails.tax : 0;
+      const tax = createInvoiceDetails.tax ?? 0;
       const orderItems = createInvoiceDetails.orderItem;
       const subTotalAmount = mapper.calculateTotalAmount(orderItems);
       const taxAmount = subTotalAmount * (tax / 100);
       const total = subTotalAmount + taxAmount;
-      const logo = createInvoiceDetails.logo;
       const invoice = {
-        logo: logo,
+        logo: createInvoiceDetails.logo,
         invoice_name: createInvoiceDetails.invoiceName,
         from_id: user.toString(),
         from_name: createInvoiceDetails.fromName,
@@ -130,7 +128,7 @@ export class InvoiceService {
         to_address: createInvoiceDetails.toAddress,
         to_mobile: createInvoiceDetails.toMobile,
         invoice_number: invoiceNumber,
-        issue_date: new Date(createInvoiceDetails.issueDate),
+        issue_date: createInvoiceDetails.issueDate,
         currency: createInvoiceDetails.currency,
         status: createInvoiceDetails.status,
         order_items: orderItems,
@@ -151,7 +149,9 @@ export class InvoiceService {
     if (!file) return errorMessage.invalidLogoFileNull;
 
     if (file.size > 2000000) return errorMessage.invalidLogoFileSize;
+
     const fileType = file.originalname.split('.').pop();
+
     if (fileType !== 'jpg' && fileType !== 'png')
       return errorMessage.invalidLogoFileType;
 
@@ -163,7 +163,7 @@ export class InvoiceService {
     const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
     if (!fs.existsSync(logoFolder))
       fs.mkdirSync(logoFolder, { recursive: true });
-    fs.writeFileSync(`files/logos/${filename}`, file.buffer);
+    fs.writeFileSync(path.join(logoFolder, filename), file.buffer);
     return filename;
   }
 

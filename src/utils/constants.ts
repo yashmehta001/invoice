@@ -55,6 +55,7 @@ export const responseMessage = {
   validLogoFile: { isError: false, message: 'Ok' },
   validLogoSaved: { isError: false, message: 'Logo Saved' },
   getInvoice: { isError: false, message: 'Invoice Found' },
+  getUser: { isError: false, message: 'User Found' },
 };
 
 //PDF

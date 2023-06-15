@@ -20,6 +20,7 @@ import {
 } from 'src/utils/constants';
 import { userConstants } from 'src/config/config';
 import { mapper } from 'src/utils/mapper';
+import { constants } from 'buffer';
 
 @Injectable()
 export class UsersService {
@@ -43,8 +44,8 @@ export class UsersService {
         const hashedPassword = hashSync(password, userConstants.saltRounds);
 
         const newUser = this.userRepository.create({
-          first_name: firstName,
-          last_name: lastName,
+          firstName: firstName,
+          lastName: lastName,
           email: emailLower,
           password: hashedPassword,
           is_email_verified: false,
@@ -91,12 +92,12 @@ export class UsersService {
   async getUserProfile(payload: getInvoiceParams) {
     try {
       const id = payload.toString();
-      console.log(payload);
       const user = await this.userRepository.findOneOrFail({
-        select: ['first_name', 'last_name', 'email'],
+        select: ['firstName', 'lastName', 'email'],
         where: { id },
       });
-      return user;
+
+      return { ...responseMessage.getUser, data: user };
     } catch (e) {
       return errorMessage.UserNotFound;
     }
