@@ -10,6 +10,7 @@ import {
   Put,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
   UsePipes,
   ValidationPipe,
@@ -17,7 +18,6 @@ import {
 import { InvoiceService } from './invoice.service';
 import {
   CreateInvoiceDto,
-  OrderItem,
   UpdateInvoiceDetailsDto,
   getInvoices,
 } from 'src/utils/dto/invoice.dto';
@@ -64,18 +64,6 @@ export class InvoiceController {
     return responseMessage.invoicePaid;
   }
 
-  @Post('logo')
-  @UseInterceptors(FileInterceptor('logo'))
-  async handleUpload(
-    @Headers('user') user: getInvoicesDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    const checkFile = await this.invoiceService.checkFile(file);
-    if (checkFile.isError) return checkFile;
-    const filename = await this.invoiceService.saveFile(user, file);
-    return { ...responseMessage.validLogoSaved, filename };
-  }
-
   @Post('user/email')
   async emailInvoice(
     @Headers('user') user: getInvoicesDto,
@@ -114,15 +102,15 @@ export class InvoiceController {
   @Post(':action')
   @UseInterceptors(FileInterceptor('logo'))
   async createInvoice(
-    @UploadedFile() file,
+    @UploadedFile() file: Express.Multer.File,
     @Headers('user') user: getInvoicesDto,
     @Body() body: CreateInvoiceDto,
     @Param('action') action: Action,
   ) {
-    const checkFile = await this.invoiceService.checkFile(file);
-    if (checkFile.isError) return checkFile;
-    const filename = await this.invoiceService.saveFile(user, file);
-    body.logo = filename;
+    const checkLogo = await this.invoiceService.checkFile(file);
+    if (checkLogo.isError) return checkLogo;
+    const logo = await this.invoiceService.saveLogo(user, file);
+    body.logo = logo;
     body.orderItem = JSON.parse(body.orderItem);
     body.issueDate = new Date(+body.issueDate);
     const invoiceDetails = body as unknown as createInvoiceParams;
@@ -151,16 +139,16 @@ export class InvoiceController {
   @Put(':number/:action')
   @UseInterceptors(FileInterceptor('logo'))
   async updatePdf(
-    @UploadedFile() file,
+    @UploadedFiles() file: Express.Multer.File,
     @Headers('user') user: getInvoicesDto,
     @Body() body: UpdateInvoiceDetailsDto,
     @Param('action') action: Action,
     @Param('number') number: string,
   ) {
     if (file) {
-      const checkFile = await this.invoiceService.checkFile(file);
-      if (checkFile.isError) return checkFile;
-      const filename = await this.invoiceService.saveFile(user, file);
+      // const checkFile = await this.invoiceService.checkFile(file);
+      // if (checkFile.isError) return checkFile;
+      const filename = await this.invoiceService.saveLogo(user, file);
       body.logo = filename;
     }
     body.orderItem = JSON.parse(body.orderItem);
@@ -175,11 +163,11 @@ export class InvoiceController {
     if (action == 'save') return responseMessage.invoiceSaved;
     const attachments = [
       {
-        filename: uuid(),
+        filename: uuid() + '.pdf',
         content: fs.createReadStream(pdfPath),
       },
     ];
-    await this.emailService.sendEmail(
+    this.emailService.sendEmail(
       body.toEmail,
       emailInvoiceSubject,
       emailInvoiceText,

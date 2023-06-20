@@ -1,4 +1,3 @@
-import { Transform, Type } from 'class-transformer';
 import {
   IsNotEmpty,
   IsString,
@@ -6,15 +5,12 @@ import {
   IsOptional,
   IsEmail,
   IsEnum,
-  IsArray,
-  ValidateNested,
 } from 'class-validator';
 import { Currency, PaymentStatus } from '../types';
 import { PartialType } from '@nestjs/swagger';
 
 export class getInvoices {
   @IsOptional()
-  @Transform((value) => value || 1)
   page: number;
 
   @IsOptional()

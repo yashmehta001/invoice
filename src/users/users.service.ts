@@ -20,7 +20,6 @@ import {
 } from 'src/utils/constants';
 import { userConstants } from 'src/config/config';
 import { mapper } from 'src/utils/mapper';
-import { constants } from 'buffer';
 
 @Injectable()
 export class UsersService {

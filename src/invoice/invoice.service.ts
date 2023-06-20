@@ -19,7 +19,7 @@ import {
 import { Like, Repository } from 'typeorm';
 import { mapper } from '../utils/mapper';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 import * as fs from 'fs';
 import { getInvoices } from 'src/utils/dto/invoice.dto';
 
@@ -31,19 +31,20 @@ export class InvoiceService {
 
   async getInvoice(user: getInvoiceParams, payload: getInvoices) {
     try {
-      const { page, sortBy, sortOrder, params, invoiceNumber } = payload;
-      const skip = (page - 1) * limit;
+      const { sortBy, sortOrder, params, invoiceNumber } = payload;
+      const page = payload.page ?? 1;
+      const skip = (+page - 1) * +limit;
       const userId = String(user);
       const search: typeGetDbSeach = {
-        from_id: userId,
+        fromId: userId,
       };
       if (params) search.status = params;
-      if (invoiceNumber) search.to_name = Like(`%${invoiceNumber}%`);
+      if (invoiceNumber) search.toName = Like(`%${invoiceNumber}%`);
       const order = {
         [sortBy]: sortOrder,
       };
       const dbQuery: Query = {
-        select: ['invoice_number', 'to_name', 'issue_date', 'status', 'total'],
+        select: ['invoiceNumber', 'toName', 'issueDate', 'status', 'total'],
         where: search,
         skip,
         take: limit,
@@ -55,7 +56,7 @@ export class InvoiceService {
       let total = 0;
 
       data.forEach((invoice) => {
-        invoice.invoice_number = invoice.invoice_number.split('_')[1];
+        invoice.invoiceNumber = invoice.invoiceNumber.split('_')[1];
         if (invoice.status == PaymentStatus.Outstanding) {
           total += +invoice.total;
         }
@@ -74,12 +75,12 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${name}`;
       const isInvoice = await this.invoiceRepository.findOne({
-        where: { invoice_number: invoiceNumber },
+        where: { invoiceNumber: invoiceNumber },
       });
       if (!isInvoice) throw new BadRequestException('Invoice Not Found');
-      isInvoice.invoice_number = name;
-      delete isInvoice.created_at;
-      delete isInvoice.updated_at;
+      isInvoice.invoiceNumber = name;
+      delete isInvoice.createdAt;
+      delete isInvoice.updatedAt;
       return { ...responseMessage.getInvoice, data: isInvoice };
     } catch (e) {
       return e;
@@ -90,7 +91,7 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${number}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_number: invoiceNumber },
+        where: { invoiceNumber: invoiceNumber },
       });
       if (!invoice) return false;
       return invoiceNumber;
@@ -106,7 +107,7 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${createInvoiceDetails.invoiceNumber}`;
       const isInvoice = await this.invoiceRepository.findOne({
-        where: { invoice_number: invoiceNumber },
+        where: { invoiceNumber: invoiceNumber },
       });
       if (isInvoice) return errorMessage.invoiceExists;
       const tax = createInvoiceDetails.tax ?? 0;
@@ -116,28 +117,28 @@ export class InvoiceService {
       const total = subTotalAmount + taxAmount;
       const invoice = {
         logo: createInvoiceDetails.logo,
-        invoice_name: createInvoiceDetails.invoiceName,
-        from_id: user.toString(),
-        from_name: createInvoiceDetails.fromName,
-        from_email: createInvoiceDetails.fromEmail,
-        from_address: createInvoiceDetails.fromAddress,
-        from_mobile: createInvoiceDetails.fromMobile,
-        from_business_id: createInvoiceDetails.fromBusinessId,
-        to_name: createInvoiceDetails.toName,
-        to_email: createInvoiceDetails.toEmail,
-        to_address: createInvoiceDetails.toAddress,
-        to_mobile: createInvoiceDetails.toMobile,
-        invoice_number: invoiceNumber,
-        issue_date: createInvoiceDetails.issueDate,
+        invoiceName: createInvoiceDetails.invoiceName,
+        fromId: user.toString(),
+        fromName: createInvoiceDetails.fromName,
+        fromEmail: createInvoiceDetails.fromEmail,
+        fromEddress: createInvoiceDetails.fromAddress,
+        fromMobile: createInvoiceDetails.fromMobile,
+        fromBusinessId: createInvoiceDetails.fromBusinessId,
+        toName: createInvoiceDetails.toName,
+        toEmail: createInvoiceDetails.toEmail,
+        toAddress: createInvoiceDetails.toAddress,
+        toMobile: createInvoiceDetails.toMobile,
+        invoiceNumber: invoiceNumber,
+        issueDate: createInvoiceDetails.issueDate,
         currency: createInvoiceDetails.currency,
         status: createInvoiceDetails.status,
-        order_items: orderItems,
-        tax_rate: tax,
-        sub_total: subTotalAmount,
-        tax_amount: taxAmount,
-        total: total,
-        created_at: new Date(),
-        updated_at: new Date(),
+        orderItems: orderItems,
+        taxRate: tax,
+        subTotal: subTotalAmount,
+        taxAmount,
+        total,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       return await this.invoiceRepository.save(invoice);
     } catch (e) {
@@ -151,20 +152,34 @@ export class InvoiceService {
     if (file.size > 2000000) return errorMessage.invalidLogoFileSize;
 
     const fileType = file.originalname.split('.').pop();
-
     if (fileType !== 'jpg' && fileType !== 'png')
       return errorMessage.invalidLogoFileType;
 
     return responseMessage.validLogoFile;
   }
 
-  async saveFile(user: getInvoiceParams, file: Express.Multer.File) {
-    const filename = `${user}_${uuidv4()}${path.extname(file.originalname)}`;
+  async saveLogo(user: getInvoiceParams, file: Express.Multer.File) {
+    const logoName = `${user}_${uuid()}${path.extname(file.originalname)}`;
     const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos');
     if (!fs.existsSync(logoFolder))
       fs.mkdirSync(logoFolder, { recursive: true });
-    fs.writeFileSync(path.join(logoFolder, filename), file.buffer);
-    return filename;
+    fs.writeFileSync(path.join(logoFolder, logoName), file.buffer);
+    return logoName;
+  }
+
+  async saveSignature(user: getInvoiceParams, file: Express.Multer.File) {
+    const signatureName = `${user}_${uuid()}${path.extname(file.originalname)}`;
+    const signatureFolder = path.join(
+      __dirname,
+      '..',
+      '..',
+      'files',
+      'signature',
+    );
+    if (!fs.existsSync(signatureFolder))
+      fs.mkdirSync(signatureFolder, { recursive: true });
+    fs.writeFileSync(path.join(signatureFolder, signatureName), file.buffer);
+    return signatureName;
   }
 
   async updateInvoice(
@@ -175,64 +190,38 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${updateInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_number: invoiceNumber },
+        where: { invoiceNumber: invoiceNumber },
       });
       if (!invoice) throw new BadRequestException('Invoice Not Found');
       if (updateInvoiceDetails.orderItem.length) {
-        invoice.sub_total = mapper.calculateTotalAmount(
+        invoice.subTotal = mapper.calculateTotalAmount(
           updateInvoiceDetails.orderItem,
         );
-        invoice.tax_amount = invoice.sub_total * (invoice.tax_rate / 100);
-        invoice.total = invoice.sub_total + invoice.tax_amount;
+        invoice.taxAmount = invoice.subTotal * (invoice.taxRate / 100);
+        invoice.total = invoice.subTotal + invoice.taxAmount;
       }
-      invoice.from_name = updateInvoiceDetails.fromName
-        ? updateInvoiceDetails.fromName
-        : invoice.from_name;
-      invoice.invoice_number = invoiceNumber;
-      invoice.from_email = updateInvoiceDetails.fromEmail
-        ? updateInvoiceDetails.fromEmail
-        : invoice.from_email;
-      invoice.issue_date = updateInvoiceDetails.issueDate
-        ? new Date(updateInvoiceDetails.issueDate)
-        : invoice.issue_date;
-      invoice.from_address = updateInvoiceDetails.fromAddress
-        ? updateInvoiceDetails.fromAddress
-        : invoice.from_address;
-      invoice.from_mobile = updateInvoiceDetails.fromMobile
-        ? updateInvoiceDetails.fromMobile
-        : invoice.from_mobile;
-      invoice.from_business_id = updateInvoiceDetails.fromBusinessId
-        ? updateInvoiceDetails.fromBusinessId
-        : invoice.from_business_id;
-      invoice.logo = updateInvoiceDetails.logo
-        ? updateInvoiceDetails.logo
-        : invoice.logo;
-      invoice.to_name = updateInvoiceDetails.toName
-        ? updateInvoiceDetails.toName
-        : invoice.to_name;
-      invoice.to_email = updateInvoiceDetails.toEmail
-        ? updateInvoiceDetails.toEmail
-        : invoice.to_email;
-      invoice.to_address = updateInvoiceDetails.toAddress
-        ? updateInvoiceDetails.toAddress
-        : invoice.to_address;
-      invoice.to_mobile = updateInvoiceDetails.toMobile
-        ? updateInvoiceDetails.toMobile
-        : invoice.to_mobile;
-      invoice.order_items = updateInvoiceDetails.orderItem
-        ? updateInvoiceDetails.orderItem
-        : invoice.order_items;
-      invoice.tax_rate = updateInvoiceDetails.tax
-        ? updateInvoiceDetails.tax
-        : invoice.tax_rate;
-      invoice.currency = updateInvoiceDetails.currency
-        ? updateInvoiceDetails.currency
-        : invoice.currency;
-      invoice.status = updateInvoiceDetails.status
-        ? updateInvoiceDetails.status
-        : invoice.status;
-      invoice.updated_at = new Date();
-
+      invoice.fromName = updateInvoiceDetails.fromName ?? invoice.fromName;
+      invoice.fromEmail = updateInvoiceDetails.fromEmail ?? invoice.fromEmail;
+      invoice.issueDate =
+        updateInvoiceDetails.issueDate !== undefined
+          ? new Date(updateInvoiceDetails.issueDate)
+          : invoice.issueDate;
+      invoice.fromAddress =
+        updateInvoiceDetails.fromAddress ?? invoice.fromAddress;
+      invoice.fromMobile =
+        updateInvoiceDetails.fromMobile ?? invoice.fromMobile;
+      invoice.fromBusinessId =
+        updateInvoiceDetails.fromBusinessId ?? invoice.fromBusinessId;
+      invoice.logo = updateInvoiceDetails.logo ?? invoice.logo;
+      invoice.toName = updateInvoiceDetails.toName ?? invoice.toName;
+      invoice.toEmail = updateInvoiceDetails.toEmail ?? invoice.toEmail;
+      invoice.toAddress = updateInvoiceDetails.toAddress ?? invoice.toAddress;
+      invoice.toMobile = updateInvoiceDetails.toMobile ?? invoice.toMobile;
+      invoice.orderItems = updateInvoiceDetails.orderItem ?? invoice.orderItems;
+      invoice.taxRate = updateInvoiceDetails.tax ?? invoice.taxRate;
+      invoice.currency = updateInvoiceDetails.currency ?? invoice.currency;
+      invoice.status = updateInvoiceDetails.status ?? invoice.status;
+      invoice.updatedAt = new Date();
       const savedInvoice = await this.invoiceRepository.save(invoice);
       return savedInvoice;
     } catch (e) {
@@ -244,11 +233,11 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${deleteInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_number: invoiceNumber },
+        where: { invoiceNumber: invoiceNumber },
       });
       if (!invoice) throw new BadRequestException('Invoice Not Found');
       const logo = `${logoFolder}/${invoice.logo}`;
-      const pdf = `${pdfFolder}${invoice.invoice_number}`;
+      const pdf = `${pdfFolder}${invoice.invoiceNumber}`;
       if (fs.existsSync(logo))
         fs.unlink(logo, (err) => {
           if (err) console.log(err);
@@ -270,7 +259,7 @@ export class InvoiceService {
     try {
       const invoiceNumber = `${user}_${paidInvoiceNumber}`;
       const invoice = await this.invoiceRepository.findOne({
-        where: { invoice_name: invoiceNumber },
+        where: { invoiceName: invoiceNumber },
       });
       if (!invoice) throw new BadRequestException('Invoice Not Found');
       invoice.status = PaymentStatus.Paid;

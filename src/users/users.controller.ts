@@ -24,7 +24,7 @@ export class UsersController {
     const createUser = await this.userService.createUser(payload);
     if (createUser.isError) return createUser;
 
-    await this.emailService.sendEmail(
+    this.emailService.sendEmail(
       payload.email,
       createUserSubject,
       createUser.message,
@@ -38,7 +38,7 @@ export class UsersController {
   async resendEmail(@Body() payload: ResendEmailDto) {
     const user = await this.userService.resendEmail(payload);
     if (user.isError) return user;
-    await this.emailService.sendEmail(
+    this.emailService.sendEmail(
       payload.email,
       createUserSubject,
       user.message,
@@ -49,7 +49,6 @@ export class UsersController {
 
   @Get('profile')
   async getProfile(@Headers('user') user: getInvoicesDto) {
-    console.log(user);
     return await this.userService.getUserProfile(user);
   }
 

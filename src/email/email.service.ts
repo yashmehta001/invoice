@@ -24,7 +24,7 @@ export class EmailService {
         to,
         subject,
         text,
-        attachments: attachments,
+        attachments,
       };
       const info = await transporter.sendMail(emailPayload);
 
