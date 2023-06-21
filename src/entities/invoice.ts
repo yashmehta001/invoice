@@ -14,70 +14,103 @@ export class Invoice {
 
   @Column({
     default: uuid(),
+    name: 'invoice_name',
   })
-  invoice_name: string;
+  invoiceName: string;
 
-  @Column()
-  from_id: string;
+  @Column({
+    name: 'from_id',
+  })
+  fromId: string;
 
-  @Column()
-  from_name: string;
+  @Column({
+    name: 'from_name',
+  })
+  fromName: string;
 
-  @Column()
-  from_email: string;
+  @Column({
+    name: 'from_email',
+  })
+  fromEmail: string;
 
   @Column({
     nullable: true,
+    name: 'from_address',
   })
-  from_address: string;
+  fromAddress: string;
 
   @Column({
     nullable: true,
+    name: 'from_mobile',
   })
-  from_mobile: string;
+  fromMobile: string;
 
   @Column({
     nullable: true,
+    name: 'from_business_id',
   })
-  from_business_id: string;
+  fromBusinessId: string;
 
-  @Column()
-  to_name: string;
+  @Column({
+    name: 'to_name',
+  })
+  toName: string;
 
-  @Column()
-  to_email: string;
+  @Column({
+    name: 'to_email',
+  })
+  toEmail: string;
 
   @Column({
     nullable: true,
+    name: 'to_address',
   })
-  to_address: string;
+  toAddress: string;
 
   @Column({
     nullable: true,
+    name: 'to_mobile',
   })
-  to_mobile: string;
+  toMobile: string;
 
   @Column({
     unique: true,
+    name: 'invoice_number',
   })
-  invoice_number: string;
+  invoiceNumber: string;
 
   @Column({
     default: new Date(),
+    name: 'issue_date',
   })
-  issue_date: Date;
+  issueDate: Date;
 
-  @Column('json')
-  order_items: Array<{ name: string; quantity: number; price: number }>;
+  @Column({ type: 'json', name: 'order_items' })
+  orderItems: Array<{ name: string; quantity: number; price: number }>;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  tax_rate: number;
+  @Column({
+    name: 'tax_rate',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  taxRate: number;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  sub_total: number;
+  @Column({
+    name: 'sub_total',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  subTotal: number;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
-  tax_amount: number;
+  @Column({
+    name: 'tax_amount',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  taxAmount: number;
 
   @Column('decimal', { precision: 10, scale: 2, default: 0 })
   total: number;
@@ -94,11 +127,13 @@ export class Invoice {
 
   @Column({
     default: new Date(),
+    name: 'created_at',
   })
-  created_at: Date;
+  createdAt: Date;
 
   @Column({
     default: new Date(),
+    name: 'updated_at',
   })
-  updated_at: Date;
+  updatedAt: Date;
 }

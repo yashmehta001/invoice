@@ -125,34 +125,34 @@ export type updateInvoiceParams = {
 };
 
 export type typeGetDbSeach = {
-  from_id: string;
+  fromId: string;
   status?: PaymentStatus;
-  to_name?: FindOperator<string>;
+  toName?: FindOperator<string>;
 };
 
 export type createPdfParams = {
   logo: string;
-  invoice_name: string;
-  from_name: string;
-  from_email: string;
-  from_address: string;
-  from_mobile: string;
-  from_business_id: string;
-  to_name: string;
-  to_email: string;
-  to_address: string;
-  to_mobile: string;
-  invoice_number: string;
-  issue_date: Date; // Assuming the date will be represented as a string
-  order_items: OrderItem[];
-  tax_rate: number;
-  tax_amount: number;
+  invoiceName: string;
+  fromName: string;
+  fromEmail: string;
+  fromAddress: string;
+  fromMobile: string;
+  fromBusinessId: string;
+  toName: string;
+  toEmail: string;
+  toAddress: string;
+  toMobile: string;
+  invoiceNumber: string;
+  issueDate: Date; // Assuming the date will be represented as a string
+  orderItems: OrderItem[];
+  taxRate: number;
+  taxAmount: number;
   currency: string;
   status: string;
-  sub_total: number;
+  subTotal: number;
   total: number;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type attachmentParams = {
