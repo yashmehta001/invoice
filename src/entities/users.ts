@@ -1,6 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity({ name: 'User' })
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -34,12 +40,12 @@ export class User {
   })
   otp_created_at: Date;
 
-  @Column({
+  @CreateDateColumn({
     default: new Date(),
   })
   created_at: Date;
 
-  @Column({
+  @UpdateDateColumn({
     default: new Date(),
   })
   updated_at: Date;

@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { mailConfig } from '../config/config';
+import { config } from '../utils/constants';
 import { attachmentParams } from 'src/utils/types';
 
 @Injectable({})
 export class EmailService {
+  private transporter: nodemailer.Transporter;
+
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      service: config.mailConfig.emailService,
+      auth: {
+        user: config.mailConfig.email,
+        pass: config.mailConfig.password,
+      },
+    });
+  }
   async sendEmail(
     to: string,
     subject: string,
@@ -12,21 +23,13 @@ export class EmailService {
     attachments: attachmentParams[] | null,
   ) {
     try {
-      const transporter = nodemailer.createTransport({
-        service: mailConfig.emailService,
-        auth: {
-          user: mailConfig.email,
-          pass: mailConfig.password,
-        },
-      });
-      const emailPayload = {
-        from: mailConfig.email,
+      const info = await this.transporter.sendMail({
+        from: config.mailConfig.email,
         to,
         subject,
         text,
         attachments,
-      };
-      const info = await transporter.sendMail(emailPayload);
+      });
 
       console.log('Email sent ' + info.response);
     } catch (e) {
