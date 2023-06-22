@@ -27,6 +27,11 @@ export enum sortBy {
   status = 'status',
 }
 
+export enum AuthType {
+  Bearer,
+  None,
+}
+
 export type CreateUserParams = {
   firstName: string;
   lastName: string;
@@ -165,3 +170,8 @@ export type Order = {
 };
 
 export type Query = FindManyOptions<Invoice>;
+
+export type responseObject = {
+  isError: boolean;
+  message: string;
+};

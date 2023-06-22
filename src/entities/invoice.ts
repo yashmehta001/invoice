@@ -2,7 +2,7 @@ import { Currency, PaymentStatus } from 'src/utils/types';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
-@Entity({ name: 'Invoice' })
+@Entity({ name: 'invoices' })
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
   id: string;

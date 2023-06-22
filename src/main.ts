@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import 'dotenv/config';
-import { port } from './config/config';
+// import 'dotenv/config';
+import { config } from './utils/constants';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
@@ -30,8 +30,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(port);
+  await app.listen(config.port);
 
-  console.log(`server is running at port ${port}`);
+  console.log(`server is running at port ${config.port}`);
 }
 bootstrap();

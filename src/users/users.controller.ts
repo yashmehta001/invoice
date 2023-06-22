@@ -10,8 +10,11 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { createUserSubject, responseMessage } from 'src/utils/constants';
 import { EmailService } from 'src/email/email.service';
+import { Auth } from 'src/utils/decorator';
+import { AuthType } from 'src/utils/types';
 
 @ApiTags('users')
+@Auth(AuthType.None)
 @Controller('users')
 export class UsersController {
   constructor(
@@ -47,8 +50,10 @@ export class UsersController {
     return responseMessage.resendEmail;
   }
 
+  @Auth(AuthType.Bearer)
   @Get('profile')
   async getProfile(@Headers('user') user: getInvoicesDto) {
+    if (user.isError) return user;
     return await this.userService.getUserProfile(user);
   }
 

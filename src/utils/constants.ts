@@ -7,6 +7,8 @@ export const createUserText = 'Welcome to Invoicing. Your OTP is ';
 export const emailInvoiceSubject = 'Invoice';
 export const emailInvoiceText = 'PFA Invoice';
 
+export const REQUEST_USER_KEY = 'user';
+
 //Error Responses
 export const errorMessage = {
   dbError: {
@@ -65,3 +67,24 @@ export const logoFolder = path.join(__dirname, '..', '..', 'files', 'logos/');
 
 //Database
 export const limit = 10;
+
+export const config = {
+  port: process.env.PORT,
+  otpExpiryTime: +process.env.CODE_EXPIRY_TIME * 60 * 1000,
+  database: {
+    dbHost: process.env.DATABASE_HOST,
+    dbPort: Number(process.env.DATABASE_PORT),
+    dbUsername: process.env.DATABASE_USER,
+    dbPassword: String(process.env.DATABASE_PASSWORD),
+    databaseName: process.env.DATABASE_NAME,
+  },
+  jwt: {
+    saltRounds: +process.env.SALTROUND,
+    jwtSecret: process.env.JWT_SECRET,
+  },
+  mailConfig: {
+    email: process.env.USER_EMAIL,
+    password: process.env.EMAIL_PASSWORD,
+    emailService: process.env.EMAIL_SERVICE,
+  },
+};

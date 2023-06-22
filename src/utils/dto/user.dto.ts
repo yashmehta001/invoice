@@ -4,6 +4,7 @@ import {
   IsEmail,
   Matches,
   Length,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -71,4 +72,7 @@ export class ResendEmailDto {
 export class getInvoicesDto {
   @IsNotEmpty()
   user: string;
+
+  @IsOptional()
+  isError: boolean;
 }

@@ -1,7 +1,4 @@
-import { compareSync, hashSync } from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
-
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/users';
 import {
@@ -18,13 +15,21 @@ import {
   responseMessage,
   createUserText,
 } from 'src/utils/constants';
-import { userConstants } from 'src/config/config';
+import { config } from '../utils/constants';
 import { mapper } from 'src/utils/mapper';
+import { HashingService } from './hashing/hashing.service';
+import { JwtService } from '@nestjs/jwt';
+import jwtConfig from './jwt.config';
+import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly hashingService: HashingService,
+    private readonly jwtService: JwtService,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtCofiguration: ConfigType<typeof jwtConfig>,
   ) {}
 
   async createUser(payload: CreateUserParams) {
@@ -40,7 +45,7 @@ export class UsersService {
       const currentDate = new Date();
 
       try {
-        const hashedPassword = hashSync(password, userConstants.saltRounds);
+        const hashedPassword = await this.hashingService.hash(password);
 
         const newUser = this.userRepository.create({
           firstName: firstName,
@@ -112,7 +117,7 @@ export class UsersService {
         });
         const otpCreatedAt = new Date(user.otp_created_at);
         if (user.is_email_verified) return errorMessage.isVerified;
-        if (now > otpCreatedAt.getTime() + userConstants.otpExpiryTime) {
+        if (now > otpCreatedAt.getTime() + config.otpExpiryTime) {
           this.resendEmail({ email });
           return errorMessage.otpExpired;
         }
@@ -137,14 +142,28 @@ export class UsersService {
         where: { email },
       });
 
-      const verifyPassword = compareSync(password, user.password);
+      const verifyPassword = await this.hashingService.compare(
+        password,
+        user.password,
+      );
       if (!verifyPassword) return errorMessage.login;
       if (!user.is_email_verified) {
         this.resendEmail({ email });
         return errorMessage.emailNotVerified;
       }
-      const userId = { id: user.id };
-      const accessToken = jwt.sign(userId, userConstants.jwtSecret);
+      // const userId = { id: user.id };
+      const accessToken =
+        'Bearer ' +
+        (await this.jwtService.signAsync(
+          { id: user.id },
+          {
+            // audience: this.jwtCofiguration.audience,
+            // issuer: this.jwtCofiguration.issuer,
+            secret: this.jwtCofiguration.secret,
+            expiresIn: this.jwtCofiguration.accessTokenTtl,
+          },
+        ));
+      // jwt.sign(userId, config.jwt.jwtSecret);
       return { ...responseMessage.userLogin, data: { accessToken } };
     } catch (e) {
       return errorMessage.login;
